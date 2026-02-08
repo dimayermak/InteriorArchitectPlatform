@@ -142,12 +142,7 @@ export function ClientDetailClient({ client: initialClient }: ClientDetailClient
                                 <label className="text-xs text-neutral-500 dark:text-neutral-400 block mb-1">כתובת</label>
                                 <span className="text-neutral-900 dark:text-white">{client.address || '-'}</span>
                             </div>
-                            <div>
-                                <label className="text-xs text-neutral-500 dark:text-neutral-400 block mb-1">סוג לקוח</label>
-                                <span className="text-neutral-900 dark:text-white">
-                                    {client.type === 'business' ? 'עסקי' : 'פרטי'}
-                                </span>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -183,7 +178,6 @@ function EditClientModal({
         phone: client.phone || '',
         company: client.company || '',
         address: client.address || '',
-        type: client.type,
         notes: client.notes || '',
     });
 
@@ -234,17 +228,7 @@ function EditClientModal({
                         className="w-full p-2 rounded-lg border dark:bg-neutral-900 dark:border-neutral-700"
                     />
                 </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">סוג</label>
-                    <select
-                        value={formData.type}
-                        onChange={e => setFormData({ ...formData, type: e.target.value as Client['type'] })}
-                        className="w-full p-2 rounded-lg border dark:bg-neutral-900 dark:border-neutral-700"
-                    >
-                        <option value="individual">פרטי</option>
-                        <option value="business">עסקי</option>
-                    </select>
-                </div>
+
                 <div>
                     <label className="block text-sm font-medium mb-1">הערות</label>
                     <textarea
