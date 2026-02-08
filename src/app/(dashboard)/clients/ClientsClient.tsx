@@ -30,39 +30,35 @@ export function ClientsClient({ initialClients, organizationId }: ClientsClientP
 
     const handleSaveClient = async (clientData: Partial<Client>) => {
         setLoading(true);
+        console.log('Attempting to save client:', clientData);
         try {
             if (editingClient) {
                 // Update existing client
                 const updated = await updateClient(editingClient.id, clientData);
                 setClients(clients.map(c => c.id === editingClient.id ? updated : c));
             } else {
-                // Create new client with all required fields
-                const newClient = await createClient({
+                // Create new client with only basic fields first to debug
+                const newClientPayload = {
                     organization_id: organizationId,
                     name: clientData.name || '',
                     email: clientData.email ?? null,
                     phone: clientData.phone ?? null,
                     address: clientData.address ?? null,
-                    city: null,
-                    postal_code: null,
-                    company: null,
-                    lead_id: null,
-                    status: 'active',
+                    status: 'active' as const,
                     notes: clientData.notes ?? null,
-                    type: 'individual',
-                    portal_enabled: false,
-                    portal_token: null,
-                    metadata: {},
-                    created_by: null,
-                });
+                    type: 'individual' as const,
+                };
+
+                console.log('Payload:', newClientPayload);
+                const newClient = await createClient(newClientPayload);
                 setClients([newClient, ...clients]);
             }
             setIsModalOpen(false);
             router.refresh();
-        } catch (error) {
-            console.error('Error saving client:', error);
-            const errorMessage = error instanceof Error ? error.message : 'שגיאה לא ידועה';
-            alert(`שגיאה בשמירת הלקוח: ${errorMessage}`);
+        } catch (error: any) {
+            console.error('Error saving client (Full details):', error);
+            const msg = error?.message || error?.error_description || JSON.stringify(error);
+            alert(`שגיאה בשמירת הלקוח:\n${msg}`);
         } finally {
             setLoading(false);
         }
