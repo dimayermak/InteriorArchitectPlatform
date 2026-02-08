@@ -36,16 +36,24 @@ export function ClientsClient({ initialClients, organizationId }: ClientsClientP
                 const updated = await updateClient(editingClient.id, clientData);
                 setClients(clients.map(c => c.id === editingClient.id ? updated : c));
             } else {
-                // Create new client
+                // Create new client with all required fields
                 const newClient = await createClient({
                     organization_id: organizationId,
                     name: clientData.name || '',
                     email: clientData.email ?? null,
                     phone: clientData.phone ?? null,
                     address: clientData.address ?? null,
+                    city: null,
+                    postal_code: null,
+                    company: null,
+                    lead_id: null,
                     status: 'active',
                     notes: clientData.notes ?? null,
                     type: 'individual',
+                    portal_enabled: false,
+                    portal_token: null,
+                    metadata: {},
+                    created_by: null,
                 });
                 setClients([newClient, ...clients]);
             }
@@ -53,7 +61,8 @@ export function ClientsClient({ initialClients, organizationId }: ClientsClientP
             router.refresh();
         } catch (error) {
             console.error('Error saving client:', error);
-            alert('שגיאה בשמירת הלקוח');
+            const errorMessage = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+            alert(`שגיאה בשמירת הלקוח: ${errorMessage}`);
         } finally {
             setLoading(false);
         }

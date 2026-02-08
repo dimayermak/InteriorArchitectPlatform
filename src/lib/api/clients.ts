@@ -1,7 +1,8 @@
 import { createClient as getSupabaseClient } from '@/lib/supabase/client';
 import type { Client } from '@/types/database';
 
-type ClientInsert = Pick<Client, 'organization_id' | 'name'> & Partial<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'name'>>;
+// ClientInsert includes all fields that may be needed for insert
+type ClientInsert = Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>;
 type ClientUpdate = Partial<Omit<Client, 'id'>>;
 
 
