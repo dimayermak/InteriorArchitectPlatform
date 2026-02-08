@@ -7,7 +7,7 @@ import type { Meeting, MeetingType, MeetingStatus } from '@/types/database';
 // Calendar API
 // ============================================
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 export type MeetingInsert = Omit<Meeting, 'id' | 'created_at' | 'updated_at'>;
 export type MeetingUpdate = Partial<Omit<Meeting, 'id' | 'created_at' | 'updated_at'>>;

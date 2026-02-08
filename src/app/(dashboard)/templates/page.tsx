@@ -10,7 +10,7 @@ import { getTemplates, createTemplate, deleteTemplate, duplicateTemplate } from 
 import type { ProjectTemplate, ProjectType } from '@/types/database';
 import { Plus, Copy, Trash2, FileText, Layers, Building2, MoreVertical } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const typeLabels: Record<ProjectType, { label: string; icon: React.ReactNode; color: string }> = {
     interior_design: { label: 'עיצוב פנים', icon: <Layers className="w-5 h-5" />, color: 'bg-purple-100 text-purple-700' },

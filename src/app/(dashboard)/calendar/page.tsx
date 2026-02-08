@@ -13,7 +13,7 @@ import {
     Clock, MapPin, Users, Building2, Trash2, Edit2, X
 } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 const MONTHS_HE = [

@@ -13,7 +13,7 @@ import { getClients } from '@/lib/api/clients';
 import type { Project, Client } from '@/types/database';
 import { Plus, Search, FolderOpen, MoreVertical, Calendar, User, Trash2, Eye } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const statusLabels: Record<string, { label: string; variant: 'default' | 'primary' | 'success' | 'warning' | 'info' }> = {
     planning: { label: 'תכנון', variant: 'info' },

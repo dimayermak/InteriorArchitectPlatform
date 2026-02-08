@@ -10,7 +10,7 @@ import { getSuppliers, createSupplier, updateSupplier, deleteSupplier, togglePre
 import type { Supplier } from '@/types/database';
 import { Plus, Search, Star, StarOff, Phone, Mail, Globe, MapPin, MoreVertical, Trash2, Edit2, Store } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const CATEGORY_OPTIONS = [
     'ריהוט',

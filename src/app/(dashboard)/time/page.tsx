@@ -10,8 +10,8 @@ import { getProjects } from '@/lib/api/projects';
 import type { TimeEntry, Project } from '@/types/database';
 import { Play, Pause, Plus, Clock, Calendar, Trash2, Timer } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
-const DEV_USER_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
+const DEV_USER_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 export default function TimePage() {
     const [entries, setEntries] = useState<TimeEntry[]>([]);

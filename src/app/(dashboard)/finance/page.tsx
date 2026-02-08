@@ -11,8 +11,8 @@ import { getProjects } from '@/lib/api/projects';
 import type { Invoice, Expense, Project } from '@/types/database';
 import { Plus, FileText, Receipt, TrendingUp, TrendingDown, DollarSign, CheckCircle, Clock, Trash2 } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
-const DEV_USER_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
+const DEV_USER_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const EXPENSE_CATEGORIES = ['חומרים', 'נסיעות', 'עמלות', 'תשלומים לספקים', 'הוצאות משרד', 'פרסום', 'ביטוח', 'אחר'];
 

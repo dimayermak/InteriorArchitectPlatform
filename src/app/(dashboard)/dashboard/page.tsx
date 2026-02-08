@@ -8,7 +8,7 @@ import { getDashboardStats, getRecentActivity, getUpcomingTasks, type DashboardS
 import { Users, FolderOpen, TrendingUp, Clock, Plus, ArrowLeft, Calendar, AlertCircle } from 'lucide-react';
 
 // Dev mode organization ID
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 export default function DashboardPage() {
     const [stats, setStats] = useState<DashboardStats | null>(null);

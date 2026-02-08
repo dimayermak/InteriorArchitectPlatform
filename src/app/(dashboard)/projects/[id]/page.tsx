@@ -13,7 +13,7 @@ import { getTasks, createTask, updateTask, deleteTask, completeTask } from '@/li
 import type { Project, ProjectPhase, Task } from '@/types/database';
 import { ArrowRight, Calendar, User, Clock, CheckCircle2, Circle, Plus, MoreVertical, Trash2, Edit2, DollarSign, Target } from 'lucide-react';
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
     planning: { label: 'תכנון', color: 'bg-blue-100 text-blue-700' },

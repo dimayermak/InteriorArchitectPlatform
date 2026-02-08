@@ -7,7 +7,7 @@ import type { ProjectTemplate } from '@/types/database';
 // Templates API
 // ============================================
 
-const DEV_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
 export type TemplateInsert = Omit<ProjectTemplate, 'id' | 'created_at' | 'updated_at'>;
 export type TemplateUpdate = Partial<Omit<ProjectTemplate, 'id' | 'created_at' | 'updated_at'>>;
