@@ -4,20 +4,18 @@ import type { Project, ProjectPhase } from '@/types/database';
 type ProjectInsert = Pick<Project, 'organization_id' | 'client_id' | 'name'> & Partial<Omit<Project, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'client_id' | 'name'>>;
 type ProjectUpdate = Partial<Omit<Project, 'id'>>;
 
-const PROJECT_COLUMNS = 'id, organization_id, client_id, name, description, project_number, type, status, priority, start_date, estimated_end_date, actual_end_date, budget, currency, site_address, site_city, meetings_office_quota, meetings_office_used, meetings_site_quota, meetings_site_used, meetings_shopping_quota, meetings_shopping_used, manager_id, metadata, created_by, created_at, updated_at, deleted_at';
-
 export async function getProjects(organizationId: string): Promise<Project[]> {
     const supabase = createClient();
 
     const { data, error } = await supabase
         .from('projects')
-        .select(PROJECT_COLUMNS)
+        .select('*')
         .eq('organization_id', organizationId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data || [];
+    return (data || []) as Project[];
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
@@ -25,7 +23,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
 
     const { data, error } = await supabase
         .from('projects')
-        .select(PROJECT_COLUMNS)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -33,7 +31,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
         if (error.code === 'PGRST116') return null;
         throw new Error(error.message);
     }
-    return data;
+    return data as Project;
 }
 
 export async function getProjectWithDetails(id: string): Promise<Project & { client: { name: string } | null; phases: ProjectPhase[] }> {
@@ -42,7 +40,7 @@ export async function getProjectWithDetails(id: string): Promise<Project & { cli
     const { data, error } = await supabase
         .from('projects')
         .select(`
-            ${PROJECT_COLUMNS},
+            *,
             clients(name),
             project_phases(*)
         `)
@@ -77,11 +75,11 @@ export async function createProject(project: ProjectInsert): Promise<Project> {
             meetings_shopping_used: 0,
             metadata: project.metadata || {},
         })
-        .select(PROJECT_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Project;
 }
 
 export async function updateProject(id: string, updates: ProjectUpdate): Promise<Project> {
@@ -91,11 +89,11 @@ export async function updateProject(id: string, updates: ProjectUpdate): Promise
         .from('projects')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select(PROJECT_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Project;
 }
 
 export async function deleteProject(id: string): Promise<void> {

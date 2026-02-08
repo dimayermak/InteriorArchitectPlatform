@@ -6,21 +6,19 @@ type ClientInsert = Pick<Client, 'organization_id' | 'name'> & Partial<Omit<Clie
 type ClientUpdate = Partial<Omit<Client, 'id'>>;
 
 
-const CLIENT_COLUMNS = 'id, organization_id, lead_id, name, email, phone, company, address, status, notes, portal_enabled, portal_token, metadata, created_by, created_at, updated_at, deleted_at';
-
 export async function getClients(organizationId: string): Promise<Client[]> {
     const supabase = getSupabaseClient();
 
 
     const { data, error } = await supabase
         .from('clients')
-        .select(CLIENT_COLUMNS)
+        .select('*')
         .eq('organization_id', organizationId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data || [];
+    return (data || []) as Client[];
 }
 
 export async function getClientById(id: string): Promise<Client | null> {
@@ -28,7 +26,7 @@ export async function getClientById(id: string): Promise<Client | null> {
 
     const { data, error } = await supabase
         .from('clients')
-        .select(CLIENT_COLUMNS)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -36,7 +34,7 @@ export async function getClientById(id: string): Promise<Client | null> {
         if (error.code === 'PGRST116') return null;
         throw new Error(error.message);
     }
-    return data;
+    return data as Client;
 }
 
 export async function createClient(client: ClientInsert): Promise<Client> {
@@ -45,11 +43,11 @@ export async function createClient(client: ClientInsert): Promise<Client> {
     const { data, error } = await supabase
         .from('clients')
         .insert(client)
-        .select(CLIENT_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Client;
 }
 
 export async function updateClient(id: string, updates: ClientUpdate): Promise<Client> {
@@ -59,11 +57,11 @@ export async function updateClient(id: string, updates: ClientUpdate): Promise<C
         .from('clients')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select(CLIENT_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Client;
 }
 
 export async function deleteClient(id: string): Promise<void> {

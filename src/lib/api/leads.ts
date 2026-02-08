@@ -4,19 +4,18 @@ import type { Lead } from '@/types/database';
 type LeadInsert = Pick<Lead, 'organization_id' | 'name'> & Partial<Omit<Lead, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'name'>>;
 type LeadUpdate = Partial<Omit<Lead, 'id'>>;
 
-const LEAD_COLUMNS = 'id, organization_id, name, email, phone, company, source, status, score, notes, assigned_to, last_contacted_at, converted_at, converted_to_client_id, metadata, created_by, created_at, updated_at, deleted_at';
 
 export async function getLeads(organizationId: string): Promise<Lead[]> {
     const supabase = createClient();
 
     const { data, error } = await supabase
         .from('leads')
-        .select(LEAD_COLUMNS)
+        .select('*')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data || [];
+    return (data || []) as Lead[];
 }
 
 export async function getLeadById(id: string): Promise<Lead | null> {
@@ -24,7 +23,7 @@ export async function getLeadById(id: string): Promise<Lead | null> {
 
     const { data, error } = await supabase
         .from('leads')
-        .select(LEAD_COLUMNS)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -32,7 +31,7 @@ export async function getLeadById(id: string): Promise<Lead | null> {
         if (error.code === 'PGRST116') return null;
         throw new Error(error.message);
     }
-    return data;
+    return data as Lead;
 }
 
 export async function createLead(lead: LeadInsert): Promise<Lead> {
@@ -41,11 +40,11 @@ export async function createLead(lead: LeadInsert): Promise<Lead> {
     const { data, error } = await supabase
         .from('leads')
         .insert(lead)
-        .select(LEAD_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Lead;
 }
 
 export async function updateLead(id: string, updates: LeadUpdate): Promise<Lead> {
@@ -55,11 +54,11 @@ export async function updateLead(id: string, updates: LeadUpdate): Promise<Lead>
         .from('leads')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select(LEAD_COLUMNS)
+        .select('*')
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as Lead;
 }
 
 export async function deleteLead(id: string): Promise<void> {
