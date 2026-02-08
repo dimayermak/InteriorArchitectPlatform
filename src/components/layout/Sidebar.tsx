@@ -46,22 +46,8 @@ export function Sidebar() {
                         tooltip="דף הבית"
                         href="/dashboard"
                     />
-                    <RailItem
-                        icon={<Bell className="w-5 h-5" />}
-                        tooltip="התראות"
-                    />
-                    <RailItem
-                        icon={<Inbox className="w-5 h-5" />}
-                        tooltip="תיבת דואר"
-                    />
                 </nav>
 
-                <div className="mt-auto flex flex-col gap-4 w-full px-2 mb-4">
-                    <button
-                        className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-blue-500 mx-auto border-2 border-white/20 hover:scale-105 transition-transform duration-200"
-                        aria-label="פרופיל משתמש"
-                    />
-                </div>
             </div>
 
             {/* 2. Workspace Panel (White, Collapsible) */}
@@ -132,23 +118,7 @@ export function Sidebar() {
                     </div>
                 </nav>
 
-                {/* Trial Progress Bar */}
-                <div className="p-4 bg-muted/20 border-t border-border">
-                    <div className="text-xs font-medium mb-2 flex justify-between">
-                        <span>תוכנית PRO</span>
-                        <span className="text-primary tabular-nums">נותרו 14 יום</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-l from-primary to-secondary w-1/2 rounded-full"
-                            role="progressbar"
-                            aria-valuenow={50}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label="זמן נותר בתקופת הניסיון"
-                        />
-                    </div>
-                </div>
+
             </div>
 
             {/* Expand Button (When Collapsed) */}
