@@ -11,13 +11,14 @@ import { Home, Bell, Inbox, ChevronRight, ChevronLeft, Plus } from 'lucide-react
 const boards = [
     { id: 'b-1', name: 'דשבורד', type: 'board', color: 'bg-green-500', path: '/dashboard' },
     { id: 'b-2', name: 'פרויקטים', type: 'board', color: 'bg-emerald-500', path: '/projects' },
-    { id: 'b-3', name: 'לידים', type: 'board', color: 'bg-purple-500', path: '/leads' },
-    { id: 'b-4', name: 'לקוחות', type: 'board', color: 'bg-blue-500', path: '/clients' },
-    { id: 'b-5', name: 'מעקב זמן', type: 'board', color: 'bg-orange-500', path: '/time' },
-    { id: 'b-6', name: 'כספים', type: 'board', color: 'bg-yellow-500', path: '/finance' },
-    { id: 'b-7', name: 'ספקים', type: 'board', color: 'bg-cyan-500', path: '/suppliers' },
-    { id: 'b-8', name: 'צוות', type: 'board', color: 'bg-pink-500', path: '/team' },
-    { id: 'b-9', name: 'תבניות', type: 'board', color: 'bg-indigo-500', path: '/templates' },
+    { id: 'b-3', name: 'לוח שנה', type: 'board', color: 'bg-red-500', path: '/calendar' },
+    { id: 'b-4', name: 'לידים', type: 'board', color: 'bg-purple-500', path: '/leads' },
+    { id: 'b-5', name: 'לקוחות', type: 'board', color: 'bg-blue-500', path: '/clients' },
+    { id: 'b-6', name: 'מעקב זמן', type: 'board', color: 'bg-orange-500', path: '/time' },
+    { id: 'b-7', name: 'כספים', type: 'board', color: 'bg-yellow-500', path: '/finance' },
+    { id: 'b-8', name: 'ספקים', type: 'board', color: 'bg-cyan-500', path: '/suppliers' },
+    { id: 'b-9', name: 'צוות', type: 'board', color: 'bg-pink-500', path: '/team' },
+    { id: 'b-10', name: 'תבניות', type: 'board', color: 'bg-indigo-500', path: '/templates' },
 ];
 
 export function Sidebar() {
