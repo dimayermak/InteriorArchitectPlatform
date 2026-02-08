@@ -390,6 +390,7 @@ export function FinanceClient({ organizationId }: FinanceClientProps) {
                         value={expenseForm.description}
                         onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
                         required
+                        autoFocus
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -452,6 +453,7 @@ export function FinanceClient({ organizationId }: FinanceClientProps) {
                         <select
                             className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground"
                             value={invoiceForm.project_id}
+                            autoFocus
                             onChange={(e) => setInvoiceForm({ ...invoiceForm, project_id: e.target.value })}
                         >
                             <option value="">ללא פרויקט</option>

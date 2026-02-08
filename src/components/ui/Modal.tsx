@@ -48,6 +48,25 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
             // Focus the first focusable element
             requestAnimationFrame(() => {
+                // Priority 1: Element with autofocus
+                const autofocusElement = contentRef.current?.querySelector('[autofocus]') as HTMLElement;
+                if (autofocusElement) {
+                    autofocusElement.focus();
+                    return;
+                }
+
+                // Priority 2: First input/textarea/select in the content (excluding close button in header)
+                // We assume the close button is in the header, so we look for inputs in the body
+                const contentInputs = contentRef.current?.querySelectorAll(
+                    'input:not([type="hidden"]), textarea, select, [role="listbox"]'
+                );
+
+                if (contentInputs && contentInputs.length > 0) {
+                    (contentInputs[0] as HTMLElement).focus();
+                    return;
+                }
+
+                // Priority 3: First focusable element (fallback)
                 const firstFocusable = contentRef.current?.querySelector(
                     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
                 ) as HTMLElement;
