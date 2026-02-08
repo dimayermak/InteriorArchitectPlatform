@@ -46,7 +46,7 @@ export function ClientsClient({ initialClients, organizationId }: ClientsClientP
                     address: clientData.address ?? null,
                     status: 'active' as const,
                     notes: clientData.notes ?? null,
-                    type: 'individual' as const,
+                    // type field removed as it seems to be missing in the DB schema
                 };
 
                 console.log('Payload:', newClientPayload);
