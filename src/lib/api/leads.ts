@@ -4,12 +4,14 @@ import type { Lead } from '@/types/database';
 type LeadInsert = Pick<Lead, 'organization_id' | 'name'> & Partial<Omit<Lead, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'name'>>;
 type LeadUpdate = Partial<Omit<Lead, 'id'>>;
 
+const LEAD_COLUMNS = 'id, organization_id, name, email, phone, company, source, status, score, notes, assigned_to, last_contacted_at, converted_at, converted_to_client_id, metadata, created_by, created_at, updated_at, deleted_at';
+
 export async function getLeads(organizationId: string): Promise<Lead[]> {
     const supabase = createClient();
 
     const { data, error } = await supabase
         .from('leads')
-        .select('*')
+        .select(LEAD_COLUMNS)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
@@ -22,7 +24,7 @@ export async function getLeadById(id: string): Promise<Lead | null> {
 
     const { data, error } = await supabase
         .from('leads')
-        .select('*')
+        .select(LEAD_COLUMNS)
         .eq('id', id)
         .single();
 
@@ -39,7 +41,7 @@ export async function createLead(lead: LeadInsert): Promise<Lead> {
     const { data, error } = await supabase
         .from('leads')
         .insert(lead)
-        .select()
+        .select(LEAD_COLUMNS)
         .single();
 
     if (error) throw new Error(error.message);
@@ -53,7 +55,7 @@ export async function updateLead(id: string, updates: LeadUpdate): Promise<Lead>
         .from('leads')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select()
+        .select(LEAD_COLUMNS)
         .single();
 
     if (error) throw new Error(error.message);
@@ -89,14 +91,14 @@ export async function convertLeadToClient(leadId: string): Promise<string> {
             email: lead.email,
             phone: lead.phone,
             company: lead.company,
-            type: 'individual' as const,
+            // type: 'individual' as const, // Missing in DB
             status: 'active' as const,
             portal_enabled: false,
             metadata: {},
             notes: lead.notes,
             created_by: lead.assigned_to,
         })
-        .select()
+        .select('id, organization_id, name, email, phone, status')
         .single();
 
     if (clientError) throw new Error(clientError.message);

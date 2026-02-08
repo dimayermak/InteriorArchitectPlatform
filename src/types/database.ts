@@ -95,9 +95,9 @@ export interface Client {
     phone: string | null;
     company: string | null;
     address: string | null;
-    city: string | null;
-    postal_code: string | null;
-    type: ClientType;
+    // city: string | null;
+    // postal_code: string | null;
+    // type: ClientType; // Removed due to missing column in DB
     status: ClientStatus;
     notes: string | null;
     portal_enabled: boolean;
