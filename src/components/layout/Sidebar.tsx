@@ -17,6 +17,7 @@ const boards = [
     { id: 'b-6', name: 'כספים', type: 'board', color: 'bg-yellow-500', path: '/finance' },
     { id: 'b-7', name: 'ספקים', type: 'board', color: 'bg-cyan-500', path: '/suppliers' },
     { id: 'b-8', name: 'צוות', type: 'board', color: 'bg-pink-500', path: '/team' },
+    { id: 'b-9', name: 'תבניות', type: 'board', color: 'bg-indigo-500', path: '/templates' },
 ];
 
 export function Sidebar() {
