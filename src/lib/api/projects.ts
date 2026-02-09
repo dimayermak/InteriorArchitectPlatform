@@ -67,12 +67,6 @@ export async function createProject(project: ProjectInsert): Promise<Project> {
             priority: project.priority || 'medium',
             type: project.type || 'interior_design',
 
-            meetings_office_quota: project.meetings_office_quota ?? 5,
-            meetings_office_used: 0,
-            meetings_site_quota: project.meetings_site_quota ?? 10,
-            meetings_site_used: 0,
-            meetings_shopping_quota: project.meetings_shopping_quota ?? 3,
-            meetings_shopping_used: 0,
             metadata: project.metadata || {},
         })
         .select('*')
