@@ -127,7 +127,6 @@ export interface Project {
     estimated_end_date: string | null;
     actual_end_date: string | null;
     budget: number | null;
-    currency: string;
     site_address: string | null;
     site_city: string | null;
     meetings_office_quota: number;

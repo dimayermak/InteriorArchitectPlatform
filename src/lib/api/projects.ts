@@ -66,7 +66,7 @@ export async function createProject(project: ProjectInsert): Promise<Project> {
             status: project.status || 'planning',
             priority: project.priority || 'medium',
             type: project.type || 'interior_design',
-            currency: project.currency || 'ILS',
+
             meetings_office_quota: project.meetings_office_quota ?? 5,
             meetings_office_used: 0,
             meetings_site_quota: project.meetings_site_quota ?? 10,

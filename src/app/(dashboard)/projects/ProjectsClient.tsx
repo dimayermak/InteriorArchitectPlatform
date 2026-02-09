@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -97,6 +97,8 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
         }
     };
 
+    const closeModal = useCallback(() => setIsModalOpen(false), []);
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -169,7 +171,7 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
             )}
 
             {/* Create Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="פרויקט חדש" size="md">
+            <Modal isOpen={isModalOpen} onClose={closeModal} title="פרויקט חדש" size="md">
                 <form onSubmit={handleCreateProject} className="space-y-4">
                     <Input
                         label="שם הפרויקט"
