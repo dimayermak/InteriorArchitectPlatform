@@ -74,6 +74,8 @@ export interface Lead {
     source: string | null;
     status: LeadStatus;
     score: number;
+    value: number | null;
+    expected_close_date: string | null;
     notes: string | null;
     assigned_to: string | null;
     last_contacted_at: string | null;
@@ -94,10 +96,12 @@ export interface Client {
     email: string | null;
     phone: string | null;
     company: string | null;
+    website: string | null;
     address: string | null;
-    // city: string | null;
-    // postal_code: string | null;
-    // type: ClientType; // Removed due to missing column in DB
+    city: string | null;
+    postal_code: string | null;
+    country: string | null;
+    type: ClientType;
     status: ClientStatus;
     notes: string | null;
     portal_enabled: boolean;
@@ -129,12 +133,6 @@ export interface Project {
     budget: number | null;
     site_address: string | null;
     site_city: string | null;
-    meetings_office_quota: number;
-    meetings_office_used: number;
-    meetings_site_quota: number;
-    meetings_site_used: number;
-    meetings_shopping_quota: number;
-    meetings_shopping_used: number;
     manager_id: string | null;
     metadata: Record<string, unknown>;
     created_by: string | null;
@@ -188,6 +186,7 @@ export interface TimeEntry {
     id: string;
     organization_id: string;
     project_id: string | null;
+    client_id: string | null;
     task_id: string | null;
     user_id: string;
     description: string | null;

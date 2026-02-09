@@ -2,6 +2,7 @@
 import { notFound } from 'next/navigation';
 import { getClientWithProjects } from '@/lib/api/clients';
 import { ClientDetailClient } from './ClientDetailClient';
+import type { Client, Project } from '@/types/database';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -15,11 +16,17 @@ export default async function ClientDetailPage({ params }: PageProps) {
         notFound();
     }
 
-    const client = await getClientWithProjects(id);
+    const clientData = await getClientWithProjects(id);
 
-    if (!client) {
+    if (!clientData) {
         notFound();
     }
+
+    // Cast the client data to include typed projects
+    const client = {
+        ...clientData,
+        projects: (clientData.projects || []) as Project[]
+    };
 
     return <ClientDetailClient client={client} />;
 }

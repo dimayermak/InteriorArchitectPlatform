@@ -221,8 +221,12 @@ function ClientModal({
         name: client?.name || '',
         email: client?.email || '',
         phone: client?.phone || '',
+        company: client?.company || '',
+        website: client?.website || '',
         address: client?.address || '',
+        city: client?.city || '',
         notes: client?.notes || '',
+        type: client?.type || 'individual',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -254,6 +258,31 @@ function ClientModal({
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            סוג לקוח
+                        </label>
+                        <select
+                            value={formData.type}
+                            onChange={(e) => setFormData({ ...formData, type: e.target.value as 'individual' | 'business' })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                        >
+                            <option value="individual">פרטי</option>
+                            <option value="business">עסקי</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            חברה
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.company}
+                            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                            placeholder="שם החברה (אופציונלי)"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
                             טלפון
                         </label>
                         <input
@@ -280,6 +309,19 @@ function ClientModal({
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            אתר אינטרנט
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.website}
+                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                            placeholder="https://..."
+                            dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
                             כתובת
                         </label>
                         <input
@@ -287,7 +329,19 @@ function ClientModal({
                             value={formData.address}
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="כתובת מלאה"
+                            placeholder="רחוב ומספר"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            עיר
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.city}
+                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                            placeholder="עיר"
                         />
                     </div>
                 </div>

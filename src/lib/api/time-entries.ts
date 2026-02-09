@@ -8,6 +8,7 @@ export async function getTimeEntries(
     organizationId: string,
     options?: {
         projectId?: string;
+        clientId?: string;
         userId?: string;
         startDate?: string;
         endDate?: string;
@@ -23,6 +24,9 @@ export async function getTimeEntries(
 
     if (options?.projectId) {
         query = query.eq('project_id', options.projectId);
+    }
+    if (options?.clientId) {
+        query = query.eq('client_id', options.clientId);
     }
     if (options?.userId) {
         query = query.eq('user_id', options.userId);

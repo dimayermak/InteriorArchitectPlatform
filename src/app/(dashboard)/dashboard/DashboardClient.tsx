@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { getDashboardStats, getRecentActivity, getUpcomingTasks, type DashboardStats, type RecentActivity } from '@/lib/api/dashboard';
+import { getDashboardStats, getRecentActivity, getUpcomingTasks, getProjectStats, getClientGrowth, getRevenueStats, type DashboardStats, type RecentActivity } from '@/lib/api/dashboard';
 import { Users, FolderOpen, TrendingUp, Clock, Plus, ArrowLeft, Calendar, AlertCircle } from 'lucide-react';
+import { OverviewCharts } from '@/components/dashboard/OverviewCharts';
 
 interface DashboardClientProps {
     organizationId: string;
@@ -13,55 +14,63 @@ interface DashboardClientProps {
 
 export function DashboardClient({ organizationId }: DashboardClientProps) {
     const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [activities, setActivities] = useState<RecentActivity[]>([]);
-    const [tasks, setTasks] = useState<{ id: string; title: string; dueDate: string; project: string; priority: string }[]>([]);
+    const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+    const [upcomingTasks, setUpcomingTasks] = useState<{ id: string; title: string; dueDate: string; project: string; priority: string }[]>([]);
+    const [projectStats, setProjectStats] = useState<{ name: string; value: number; color: string }[]>([]);
+    const [clientGrowth, setClientGrowth] = useState<{ date: string; count: number }[]>([]);
+    const [revenueStats, setRevenueStats] = useState<{ name: string; income: number; expenses: number }[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function loadDashboard() {
             try {
-                const [statsData, activityData, tasksData] = await Promise.all([
+                const [statsData, activityData, tasksData, projectsData, growthData, revenueData] = await Promise.all([
                     getDashboardStats(organizationId),
-                    getRecentActivity(organizationId, 8),
-                    getUpcomingTasks(organizationId, 5),
+                    getRecentActivity(organizationId),
+                    getUpcomingTasks(organizationId),
+                    getProjectStats(organizationId),
+                    getClientGrowth(organizationId),
+                    getRevenueStats(organizationId),
                 ]);
                 setStats(statsData);
-                setActivities(activityData);
-                setTasks(tasksData);
+                setRecentActivity(activityData);
+                setUpcomingTasks(tasksData);
+                setProjectStats(projectsData);
+                setClientGrowth(growthData);
+                setRevenueStats(revenueData);
             } catch (error) {
                 console.error('Error loading dashboard:', error);
             } finally {
                 setLoading(false);
             }
         }
+
         loadDashboard();
     }, [organizationId]);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
 
+    if (!stats) return null;
+
     return (
-        <div className="space-y-8 p-6">
+        <div className="p-6 space-y-8 max-w-[1600px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">שלום! 👋</h1>
-                    <p className="text-muted-foreground mt-1">הנה סיכום הסטודיו שלך להיום</p>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        סקירה כללית
+                    </h1>
+                    <p className="text-muted-foreground mt-1">ברוכים הבאים למערכת הניהול</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link href="/leads">
-                        <Button variant="outline" className="gap-2">
-                            <Plus className="w-4 h-4" />
-                            ליד חדש
-                        </Button>
-                    </Link>
-                    <Link href="/projects">
-                        <Button className="gap-2">
+                    <Link href="/projects/new">
+                        <Button className="gap-2 shadow-sm">
                             <Plus className="w-4 h-4" />
                             פרויקט חדש
                         </Button>
@@ -69,129 +78,148 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </div>
             </div>
 
-            {/* Stats Grid */}
+            {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    title="לידים"
-                    value={stats?.leads.total || 0}
-                    subtitle={`${stats?.leads.new || 0} חדשים`}
-                    icon={<TrendingUp className="w-5 h-5" />}
-                    color="blue"
-                    href="/leads"
-                />
-                <StatCard
-                    title="לקוחות"
-                    value={stats?.clients.total || 0}
-                    subtitle={`${stats?.clients.active || 0} פעילים`}
-                    icon={<Users className="w-5 h-5" />}
-                    color="purple"
-                    href="/clients"
-                />
-                <StatCard
-                    title="פרויקטים"
-                    value={stats?.projects.total || 0}
-                    subtitle={`${stats?.projects.active || 0} בביצוע`}
-                    icon={<FolderOpen className="w-5 h-5" />}
-                    color="green"
-                    href="/projects"
-                />
-                <StatCard
-                    title="חשבוניות ממתינות"
-                    value={`₪${(stats?.finance.pendingInvoices || 0).toLocaleString()}`}
-                    subtitle="לתשלום"
-                    icon={<Clock className="w-5 h-5" />}
-                    color="amber"
-                    href="/finance"
-                />
+                <Card className="hover:shadow-lg transition-shadow duration-200 border-primary/10 bg-gradient-to-br from-background to-primary/5">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">פרויקטים פעילים</p>
+                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.projects.active}</h3>
+                                <p className="text-xs text-muted-foreground mt-1">מתוך {stats.projects.total} סה״כ</p>
+                            </div>
+                            <div className="p-3 bg-primary/10 rounded-xl">
+                                <FolderOpen className="w-5 h-5 text-primary" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow duration-200 border-indigo-500/10 bg-gradient-to-br from-background to-indigo-500/5">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">לידים חדשים</p>
+                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.leads.new}</h3>
+                                <p className="text-xs text-muted-foreground mt-1">{stats.leads.qualified} בתהליך</p>
+                            </div>
+                            <div className="p-3 bg-indigo-500/10 rounded-xl">
+                                <Users className="w-5 h-5 text-indigo-500" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow duration-200 border-emerald-500/10 bg-gradient-to-br from-background to-emerald-500/5">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">לקוחות פעילים</p>
+                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.clients.active}</h3>
+                                <p className="text-xs text-muted-foreground mt-1">מתוך {stats.clients.total} סה״כ</p>
+                            </div>
+                            <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                <Users className="w-5 h-5 text-emerald-500" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-lg transition-shadow duration-200 border-amber-500/10 bg-gradient-to-br from-background to-amber-500/5">
+                    <CardContent className="p-6">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">חשבוניות פתוחות</p>
+                                <h3 className="text-3xl font-bold mt-2 tabular-nums">₪{stats.finance.pendingInvoices.toLocaleString()}</h3>
+                                <p className="text-xs text-muted-foreground mt-1">ממתין לתשלום</p>
+                            </div>
+                            <div className="p-3 bg-amber-500/10 rounded-xl">
+                                <TrendingUp className="w-5 h-5 text-amber-500" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Charts Overview */}
+            <OverviewCharts
+                projectStats={projectStats}
+                clientGrowth={clientGrowth}
+                revenueStats={revenueStats}
+            />
+
+            {/* Recent Activity & Tasks */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Recent Activity */}
-                <Card className="lg:col-span-2">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-lg font-semibold">פעילות אחרונה</CardTitle>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground">
-                            הכל
-                            <ArrowLeft className="w-4 h-4 mr-1" />
-                        </Button>
+                <Card className="lg:col-span-2 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-muted-foreground" />
+                            פעילות אחרונה
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {activities.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                <p>אין פעילות עדיין</p>
-                                <p className="text-sm">התחילו בהוספת לידים ופרויקטים</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {activities.map((activity) => (
-                                    <div key={activity.id} className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors">
-                                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xl shrink-0">
-                                            {activity.icon}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-foreground truncate">{activity.title}</p>
-                                            <p className="text-sm text-muted-foreground">{activity.description}</p>
-                                        </div>
-                                        <time className="text-xs text-muted-foreground whitespace-nowrap tabular-nums">
-                                            {formatRelativeTime(activity.timestamp)}
-                                        </time>
+                        <div className="space-y-4">
+                            {recentActivity.map((activity) => (
+                                <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                                    <div className="mt-1 text-2xl">{activity.icon}</div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate">{activity.title}</p>
+                                        <p className="text-sm text-muted-foreground truncate">{activity.description}</p>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    <div className="text-xs text-muted-foreground whitespace-nowrap">
+                                        {new Date(activity.timestamp).toLocaleDateString('he-IL')}
+                                    </div>
+                                </div>
+                            ))}
+                            {recentActivity.length === 0 && (
+                                <div className="text-center py-8 text-muted-foreground">
+                                    אין פעילות אחרונה
+                                </div>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
 
                 {/* Upcoming Tasks */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-lg font-semibold">משימות קרובות</CardTitle>
-                        <Link href="/projects">
-                            <Button variant="ghost" size="sm" className="text-muted-foreground">
-                                הכל
-                                <ArrowLeft className="w-4 h-4 mr-1" />
-                            </Button>
+                <Card className="shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-muted-foreground" />
+                            משימות קרובות
+                        </CardTitle>
+                        <Link href="/tasks" className="text-sm text-primary hover:underline">
+                            לכל המשימות
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        {tasks.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                <p>אין משימות קרובות</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {tasks.map((task) => (
-                                    <div key={task.id} className="p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors">
-                                        <p className="font-medium text-foreground text-sm">{task.title}</p>
-                                        <div className="flex items-center justify-between mt-2">
-                                            <span className="text-xs text-muted-foreground truncate max-w-[120px]">{task.project}</span>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full ${getPriorityColor(task.priority)}`}>
-                                                {formatDate(task.dueDate)}
-                                            </span>
-                                        </div>
+                        <div className="space-y-4">
+                            {upcomingTasks.map((task) => (
+                                <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-border transition-colors">
+                                    <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${task.priority === 'urgent' ? 'bg-red-500' :
+                                            task.priority === 'high' ? 'bg-orange-500' :
+                                                task.priority === 'medium' ? 'bg-yellow-500' :
+                                                    'bg-green-500'
+                                        }`} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm truncate">{task.title}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{task.project}</p>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    <div className={`text-xs px-2 py-1 rounded-full ${new Date(task.dueDate) < new Date() ? 'bg-red-100 text-red-700' : 'bg-muted text-muted-foreground'
+                                        }`}>
+                                        {new Date(task.dueDate).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })}
+                                    </div>
+                                </div>
+                            ))}
+                            {upcomingTasks.length === 0 && (
+                                <div className="text-center py-8 text-muted-foreground">
+                                    אין משימות קרובות
+                                </div>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
-
-            {/* Quick Actions */}
-            <Card>
-                <CardContent className="p-6">
-                    <h3 className="font-semibold text-foreground mb-4">פעולות מהירות</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <QuickAction href="/leads" icon="📋" label="הוספת ליד" />
-                        <QuickAction href="/clients" icon="👤" label="לקוח חדש" />
-                        <QuickAction href="/projects" icon="🏗️" label="פרויקט חדש" />
-                        <QuickAction href="/time" icon="⏱️" label="התחל טיימר" />
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     );
 }

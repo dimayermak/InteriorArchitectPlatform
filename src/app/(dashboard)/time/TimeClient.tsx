@@ -16,6 +16,7 @@ interface TimeClientProps {
 }
 
 export function TimeClient({ organizationId, userId }: TimeClientProps) {
+    const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
     const [entries, setEntries] = useState<TimeEntry[]>([]);
     const [projects, setProjects] = useState<Project[]>([]);
     const [activeTimer, setActiveTimer] = useState<TimeEntry | null>(null);
@@ -23,19 +24,21 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
     const [loading, setLoading] = useState(true);
     const [timerElapsed, setTimerElapsed] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ project_id: '', description: '', hours: '', minutes: '', date: new Date().toISOString().split('T')[0] });
+    const [formData, setFormData] = useState({ project_id: '', client_id: '', description: '', hours: '', minutes: '', date: new Date().toISOString().split('T')[0] });
 
     useEffect(() => {
         async function load() {
             try {
-                const [entriesData, projectsData, activeData, statsData] = await Promise.all([
+                const [entriesData, projectsData, clientsData, activeData, statsData] = await Promise.all([
                     getTimeEntries(organizationId, { userId }),
                     getProjects(organizationId),
+                    import('@/lib/api/clients').then(m => m.getClients(organizationId)),
                     getActiveTimer(organizationId, userId),
                     getTimeStats(organizationId, userId),
                 ]);
                 setEntries(entriesData);
                 setProjects(projectsData);
+                setClients(clientsData);
                 setActiveTimer(activeData);
                 setStats(statsData);
             } catch (error) {
@@ -58,9 +61,16 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
         return () => clearInterval(interval);
     }, [activeTimer]);
 
-    const handleStartTimer = async (projectId?: string) => {
+    const handleStartTimer = async (projectId?: string, clientId?: string) => {
         try {
-            const timer = await startTimer({ organization_id: organizationId, user_id: userId, project_id: projectId || null, duration_minutes: 0, date: new Date().toISOString().split('T')[0] });
+            const timer = await startTimer({
+                organization_id: organizationId,
+                user_id: userId,
+                project_id: projectId || null,
+                client_id: clientId || null,
+                duration_minutes: 0,
+                date: new Date().toISOString().split('T')[0]
+            });
             setActiveTimer(timer);
         } catch (error) { console.error('Error starting timer:', error); }
     };
@@ -81,10 +91,18 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
         const totalMinutes = (parseInt(formData.hours || '0') * 60) + parseInt(formData.minutes || '0');
         if (totalMinutes <= 0) return;
         try {
-            const entry = await createManualEntry({ organization_id: organizationId, user_id: userId, project_id: formData.project_id || null, description: formData.description || null, duration_minutes: totalMinutes, date: formData.date });
+            const entry = await createManualEntry({
+                organization_id: organizationId,
+                user_id: userId,
+                project_id: formData.project_id || null,
+                client_id: formData.client_id || null,
+                description: formData.description || null,
+                duration_minutes: totalMinutes,
+                date: formData.date
+            });
             setEntries([entry, ...entries]);
             setIsModalOpen(false);
-            setFormData({ project_id: '', description: '', hours: '', minutes: '', date: new Date().toISOString().split('T')[0] });
+            setFormData({ project_id: '', client_id: '', description: '', hours: '', minutes: '', date: new Date().toISOString().split('T')[0] });
             setStats(await getTimeStats(organizationId, userId));
         } catch (error) { console.error('Error creating entry:', error); }
     };
@@ -111,7 +129,11 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
                             <div className="text-5xl font-bold tabular-nums tracking-tight">{activeTimer ? formatDuration(timerElapsed) : '00:00:00'}</div>
                             {activeTimer && <p className="text-muted-foreground mt-2 flex items-center gap-2"><Timer className="w-4 h-4 animate-pulse text-green-500" />טיימר פועל</p>}
                         </div>
-                        {activeTimer ? <Button onClick={handleStopTimer} size="lg" className="gap-2 bg-red-500 hover:bg-red-600"><Pause className="w-5 h-5" />עצור</Button> : <Button onClick={() => handleStartTimer()} size="lg" className="gap-2"><Play className="w-5 h-5" />התחל</Button>}
+                        {activeTimer ? <Button onClick={handleStopTimer} size="lg" className="gap-2 bg-red-500 hover:bg-red-600"><Pause className="w-5 h-5" />עצור</Button> : (
+                            <div className="flex gap-2">
+                                <Button onClick={() => handleStartTimer()} size="lg" className="gap-2"><Play className="w-5 h-5" />התחל</Button>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -126,9 +148,19 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
                     {entries.length === 0 ? <div className="text-center py-8"><Calendar className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" /><p className="text-muted-foreground">אין רשומות</p></div> : (
                         <div className="space-y-3">{entries.slice(0, 10).map((entry) => {
                             const project = projects.find((p) => p.id === entry.project_id);
+                            const client = clients.find((c) => c.id === entry.client_id);
+                            const contextLabel = project ? project.name : (client ? client.name : 'ללא שיוך');
+
                             return (<div key={entry.id} className="flex items-center gap-4 p-3 rounded-xl border hover:bg-muted/30 group">
                                 <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"><Clock className="w-5 h-5 text-muted-foreground" /></div>
-                                <div className="flex-1"><div className="font-medium">{entry.description || project?.name || 'ללא פרויקט'}</div><div className="text-sm text-muted-foreground">{new Date(entry.date).toLocaleDateString('he-IL')}</div></div>
+                                <div className="flex-1">
+                                    <div className="font-medium">{entry.description || 'ללא תיאור'}</div>
+                                    <div className="text-sm text-muted-foreground flex gap-2">
+                                        <span>{new Date(entry.date).toLocaleDateString('he-IL')}</span>
+                                        <span>•</span>
+                                        <span>{contextLabel}</span>
+                                    </div>
+                                </div>
                                 <div className="text-lg font-semibold tabular-nums">{formatMinutes(entry.duration_minutes)}</div>
                                 <button onClick={() => handleDeleteEntry(entry.id)} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                             </div>);
@@ -138,7 +170,32 @@ export function TimeClient({ organizationId, userId }: TimeClientProps) {
             </Card>
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="הוספת רשומת זמן" size="md">
                 <form onSubmit={handleManualEntry} className="space-y-4">
-                    <div><label className="block text-sm font-medium mb-1.5">פרויקט</label><select className="w-full h-11 px-4 rounded-lg border bg-background" value={formData.project_id} onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}><option value="">ללא פרויקט</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1.5">פרויקט</label>
+                            <select
+                                className="w-full h-11 px-4 rounded-lg border bg-background"
+                                value={formData.project_id}
+                                onChange={(e) => setFormData({ ...formData, project_id: e.target.value, client_id: '' })}
+                                disabled={!!formData.client_id}
+                            >
+                                <option value="">בחר פרויקט...</option>
+                                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1.5">או לקוח</label>
+                            <select
+                                className="w-full h-11 px-4 rounded-lg border bg-background"
+                                value={formData.client_id}
+                                onChange={(e) => setFormData({ ...formData, client_id: e.target.value, project_id: '' })}
+                                disabled={!!formData.project_id}
+                            >
+                                <option value="">בחר לקוח...</option>
+                                {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
                     <Input label="תיאור" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="מה עשית?" />
                     <div className="grid grid-cols-2 gap-4"><Input type="number" label="שעות" value={formData.hours} onChange={(e) => setFormData({ ...formData, hours: e.target.value })} min="0" dir="ltr" /><Input type="number" label="דקות" value={formData.minutes} onChange={(e) => setFormData({ ...formData, minutes: e.target.value })} min="0" max="59" dir="ltr" /></div>
                     <Input type="date" label="תאריך" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} dir="ltr" />

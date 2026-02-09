@@ -40,7 +40,15 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', client_id: '', type: 'interior_design', budget: '' });
+    const [formData, setFormData] = useState({
+        name: '',
+        client_id: '',
+        type: 'interior_design',
+        budget: '',
+        description: '',
+        priority: 'medium',
+        start_date: ''
+    });
     const router = useRouter();
 
     useEffect(() => {
@@ -76,10 +84,21 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
                 name: formData.name,
                 type: formData.type as Project['type'],
                 budget: formData.budget ? parseFloat(formData.budget) : null,
+                description: formData.description || null,
+                priority: formData.priority as Project['priority'],
+                start_date: formData.start_date || null,
             });
             setProjects([newProject, ...projects]);
             setIsModalOpen(false);
-            setFormData({ name: '', client_id: '', type: 'interior_design', budget: '' });
+            setFormData({
+                name: '',
+                client_id: '',
+                type: 'interior_design',
+                budget: '',
+                description: '',
+                priority: 'medium',
+                start_date: ''
+            });
             router.push(`/projects/${newProject.id}`);
         } catch (error: any) {
             console.error('Error creating project:', error);
@@ -171,56 +190,91 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
             )}
 
             {/* Create Modal */}
-            <Modal isOpen={isModalOpen} onClose={closeModal} title="פרויקט חדש" size="md">
+            <Modal isOpen={isModalOpen} onClose={closeModal} title="פרויקט חדש" size="lg">
                 <form onSubmit={handleCreateProject} className="space-y-4">
-                    <Input
-                        label="שם הפרויקט"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        placeholder="למשל: שיפוץ דירה - רחוב הרצל"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                            <Input
+                                label="שם הפרויקט"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
+                                placeholder="למשל: שיפוץ דירה - רחוב הרצל"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">לקוח</label>
-                        <select
-                            className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
-                            value={formData.client_id}
-                            onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                            required
-                        >
-                            <option value="">בחרו לקוח</option>
-                            {clients.map((client) => (
-                                <option key={client.id} value={client.id}>{client.name}</option>
-                            ))}
-                        </select>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-1.5">לקוח</label>
+                            <select
+                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
+                                value={formData.client_id}
+                                onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
+                                required
+                            >
+                                <option value="">בחרו לקוח</option>
+                                {clients.map((client) => (
+                                    <option key={client.id} value={client.id}>{client.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-1.5">סוג פרויקט</label>
+                            <select
+                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
+                                value={formData.type}
+                                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                            >
+                                {Object.entries(typeLabels).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-1.5">עדיפות</label>
+                            <select
+                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
+                                value={formData.priority}
+                                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                            >
+                                <option value="low">נמוכה</option>
+                                <option value="medium">בינונית</option>
+                                <option value="high">גבוהה</option>
+                                <option value="urgent">דחופה</option>
+                            </select>
+                        </div>
+
+                        <Input
+                            type="number"
+                            label="תקציב (₪)"
+                            value={formData.budget}
+                            onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                            placeholder="50000"
+                            dir="ltr"
+                        />
+
+                        <Input
+                            type="date"
+                            label="תאריך התחלה"
+                            value={formData.start_date}
+                            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                        />
+
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-foreground mb-1.5">תיאור הפרויקט</label>
+                            <textarea
+                                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary min-h-[100px] resize-none"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="תיאור קצר של הפרויקט..."
+                            />
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">סוג פרויקט</label>
-                        <select
-                            className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
-                            value={formData.type}
-                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                        >
-                            {Object.entries(typeLabels).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <Input
-                        type="number"
-                        label="תקציב (₪)"
-                        value={formData.budget}
-                        onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                        placeholder="50000"
-                        dir="ltr"
-                    />
-
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-3 pt-4 border-t border-border">
                         <Button type="submit" className="flex-1">צור פרויקט</Button>
-                        <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>ביטול</Button>
+                        <Button type="button" variant="outline" onClick={closeModal}>ביטול</Button>
                     </div>
                 </form>
             </Modal>

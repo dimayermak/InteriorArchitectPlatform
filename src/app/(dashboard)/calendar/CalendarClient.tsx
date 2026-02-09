@@ -40,6 +40,8 @@ interface CalendarClientProps {
 export function CalendarClient({ organizationId }: CalendarClientProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [meetings, setMeetings] = useState<Meeting[]>([]);
+    const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+    const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -51,19 +53,23 @@ export function CalendarClient({ organizationId }: CalendarClientProps) {
         duration_minutes: 60,
         location: '',
         description: '',
+        project_id: '',
+        client_id: '',
     });
 
     const loadMeetings = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getMeetingsForMonth(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                organizationId
-            );
-            setMeetings(data);
+            const [meetingsData, projectsData, clientsData] = await Promise.all([
+                getMeetingsForMonth(currentDate.getFullYear(), currentDate.getMonth(), organizationId),
+                import('@/lib/api/projects').then(m => m.getProjects(organizationId)),
+                import('@/lib/api/clients').then(m => m.getClients(organizationId)),
+            ]);
+            setMeetings(meetingsData);
+            setProjects(projectsData);
+            setClients(clientsData);
         } catch (error) {
-            console.error('Error loading meetings:', error);
+            console.error('Error loading data:', error);
         } finally {
             setLoading(false);
         }
@@ -141,8 +147,8 @@ export function CalendarClient({ organizationId }: CalendarClientProps) {
         try {
             const meeting = await createMeeting({
                 organization_id: organizationId,
-                project_id: null,
-                client_id: null,
+                project_id: newMeeting.project_id || null,
+                client_id: newMeeting.client_id || null,
                 title: newMeeting.title,
                 type: newMeeting.type,
                 description: newMeeting.description || null,
@@ -165,6 +171,8 @@ export function CalendarClient({ organizationId }: CalendarClientProps) {
                 duration_minutes: 60,
                 location: '',
                 description: '',
+                project_id: '',
+                client_id: '',
             });
         } catch (error) {
             console.error('Error creating meeting:', error);
@@ -302,6 +310,32 @@ export function CalendarClient({ organizationId }: CalendarClientProps) {
                                 <option key={type} value={type}>{meetingTypeLabels[type].label}</option>
                             ))}
                         </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">פרויקט</label>
+                            <select
+                                className="w-full h-12 px-4 rounded-xl border border-border bg-background text-foreground"
+                                value={newMeeting.project_id}
+                                onChange={(e) => setNewMeeting({ ...newMeeting, project_id: e.target.value, client_id: '' })}
+                                disabled={!!newMeeting.client_id}
+                            >
+                                <option value="">ללא פרויקט</option>
+                                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">או לקוח</label>
+                            <select
+                                className="w-full h-12 px-4 rounded-xl border border-border bg-background text-foreground"
+                                value={newMeeting.client_id}
+                                onChange={(e) => setNewMeeting({ ...newMeeting, client_id: e.target.value, project_id: '' })}
+                                disabled={!!newMeeting.project_id}
+                            >
+                                <option value="">ללא לקוח</option>
+                                {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
                     </div>
                     <Input
                         label="תאריך ושעה"

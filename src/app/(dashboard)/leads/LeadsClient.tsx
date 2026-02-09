@@ -380,11 +380,17 @@ function LeadModal({
         company: lead?.company || '',
         source: lead?.source || '',
         notes: lead?.notes || '',
+        value: lead?.value?.toString() || '',
+        expected_close_date: lead?.expected_close_date || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({
+            ...formData,
+            value: formData.value ? parseFloat(formData.value) : undefined,
+            expected_close_date: formData.expected_close_date || undefined,
+        });
     };
 
     return (
@@ -445,6 +451,30 @@ function LeadModal({
                             className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
                             placeholder="050-0000000"
                             dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            שווי עסקה משוער (₪)
+                        </label>
+                        <input
+                            type="number"
+                            value={formData.value}
+                            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                            placeholder="0"
+                            dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            תאריך סגירה משוער
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.expected_close_date}
+                            onChange={(e) => setFormData({ ...formData, expected_close_date: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
                         />
                     </div>
                 </div>

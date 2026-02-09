@@ -214,3 +214,75 @@ export async function getUpcomingTasks(
         priority: task.priority,
     }));
 }
+
+export async function getProjectStats(organizationId: string): Promise<{ name: string; value: number; color: string }[]> {
+    const supabase = createClient();
+    const { data } = await supabase
+        .from('projects')
+        .select('status')
+        .eq('organization_id', organizationId);
+
+    const counts: Record<string, number> = {};
+    (data || []).forEach(p => {
+        counts[p.status] = (counts[p.status] || 0) + 1;
+    });
+
+    const statusMap: Record<string, { label: string; color: string }> = {
+        'planning': { label: 'תכנון', color: '#6366f1' }, // Indigo
+        'active': { label: 'בביצוע', color: '#22c55e' }, // Green
+        'on_hold': { label: 'הושהה', color: '#f59e0b' }, // Amber
+        'completed': { label: 'הושלם', color: '#3b82f6' }, // Blue
+        'cancelled': { label: 'בוטל', color: '#ef4444' }, // Red
+    };
+
+    return Object.entries(counts).map(([status, count]) => ({
+        name: statusMap[status]?.label || status,
+        value: count,
+        color: statusMap[status]?.color || '#94a3b8',
+    }));
+}
+
+export async function getClientGrowth(organizationId: string): Promise<{ date: string; count: number }[]> {
+    const supabase = createClient();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+
+    const { data } = await supabase
+        .from('clients')
+        .select('created_at')
+        .eq('organization_id', organizationId)
+        .gte('created_at', sixMonthsAgo.toISOString());
+
+    const months: Record<string, number> = {};
+    // Initialize last 6 months
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(sixMonthsAgo);
+        d.setMonth(d.getMonth() + i);
+        const key = d.toLocaleString('he-IL', { month: 'short' });
+        months[key] = 0;
+    }
+
+    (data || []).forEach(c => {
+        const date = new Date(c.created_at);
+        const key = date.toLocaleString('he-IL', { month: 'short' });
+        if (months[key] !== undefined) {
+            months[key]++;
+        }
+    });
+
+    return Object.entries(months).map(([date, count]) => ({ date, count }));
+}
+
+export async function getRevenueStats(organizationId: string): Promise<{ name: string; income: number; expenses: number }[]> {
+    // Mock data for now as we don't have full invoice/expense history populated yet
+    // In production this would aggregate from 'invoices' and 'expenses' tables
+    return [
+        { name: 'ינו', income: 4000, expenses: 2400 },
+        { name: 'פבר', income: 3000, expenses: 1398 },
+        { name: 'מרץ', income: 9800, expenses: 2000 },
+        { name: 'אפר', income: 3908, expenses: 2780 },
+        { name: 'מאי', income: 4800, expenses: 1890 },
+        { name: 'יוני', income: 3800, expenses: 2390 },
+    ];
+}
