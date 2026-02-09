@@ -81,9 +81,9 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
             setIsModalOpen(false);
             setFormData({ name: '', client_id: '', type: 'interior_design', budget: '' });
             router.push(`/projects/${newProject.id}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating project:', error);
-            alert('שגיאה ביצירת פרויקט');
+            alert(`שגיאה ביצירת פרויקט: ${error.message || 'אנא נסו שוב'}`);
         }
     };
 

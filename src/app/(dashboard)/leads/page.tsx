@@ -1,5 +1,5 @@
 import { getCurrentOrganizationId } from '@/lib/auth/user';
-import { getLeads } from '@/lib/api/leads';
+
 import { LeadsClient } from './LeadsClient';
 import { redirect } from 'next/navigation';
 
@@ -10,7 +10,5 @@ export default async function LeadsPage() {
         redirect('/login');
     }
 
-    const leads = await getLeads(organizationId);
-
-    return <LeadsClient initialLeads={leads} organizationId={organizationId} />;
+    return <LeadsClient organizationId={organizationId} />;
 }

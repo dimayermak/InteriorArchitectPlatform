@@ -1,22 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, EmptyState } from '@/components/ui';
 import type { Client } from '@/types/database';
-import { createClient, updateClient } from '@/lib/api/clients';
+import { createClient, updateClient, getClients } from '@/lib/api/clients';
 
 interface ClientsClientProps {
-    initialClients: Client[];
+    initialClients?: Client[];
     organizationId: string;
 }
 
-export function ClientsClient({ initialClients, organizationId }: ClientsClientProps) {
+export function ClientsClient({ initialClients = [], organizationId }: ClientsClientProps) {
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<Client | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        async function loadClients() {
+            try {
+                const data = await getClients(organizationId);
+                setClients(data);
+            } catch (error) {
+                console.error('Error loading clients:', error);
+            }
+        }
+        loadClients();
+    }, [organizationId]);
 
     const handleAddClient = () => {
         setEditingClient(null);

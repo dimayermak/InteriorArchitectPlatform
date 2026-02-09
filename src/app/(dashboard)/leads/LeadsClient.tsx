@@ -1,25 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, EmptyState, LeadStatusBadge } from '@/components/ui';
 import type { Lead, LeadStatus } from '@/types/database';
-import { createLead, updateLead } from '@/lib/api/leads';
+import { createLead, updateLead, getLeads } from '@/lib/api/leads';
 
 type ViewMode = 'table' | 'kanban';
 
 interface LeadsClientProps {
-    initialLeads: Lead[];
+    initialLeads?: Lead[];
     organizationId: string;
 }
 
-export function LeadsClient({ initialLeads, organizationId }: LeadsClientProps) {
+export function LeadsClient({ initialLeads = [], organizationId }: LeadsClientProps) {
     const [leads, setLeads] = useState<Lead[]>(initialLeads);
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [loading, setLoading] = useState(false);
+
     const router = useRouter();
+
+    useEffect(() => {
+        async function loadLeads() {
+            try {
+                const data = await getLeads(organizationId);
+                setLeads(data);
+            } catch (error) {
+                console.error('Error loading leads:', error);
+            }
+        }
+        loadLeads();
+    }, [organizationId]);
 
     const handleAddLead = () => {
         setEditingLead(null);

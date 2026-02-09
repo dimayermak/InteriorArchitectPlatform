@@ -1,5 +1,4 @@
 import { getCurrentOrganizationId } from '@/lib/auth/user';
-import { getClients } from '@/lib/api/clients';
 import { ClientsClient } from './ClientsClient';
 import { redirect } from 'next/navigation';
 
@@ -10,7 +9,5 @@ export default async function ClientsPage() {
         redirect('/login');
     }
 
-    const clients = await getClients(organizationId);
-
-    return <ClientsClient initialClients={clients} organizationId={organizationId} />;
+    return <ClientsClient organizationId={organizationId} />;
 }
