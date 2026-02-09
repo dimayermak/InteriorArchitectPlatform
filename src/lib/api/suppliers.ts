@@ -101,3 +101,73 @@ export async function getSupplierCategories(organizationId: string): Promise<str
     const categories = new Set((data || []).map((d) => d.category).filter(Boolean));
     return Array.from(categories) as string[];
 }
+
+export async function getProjectSuppliers(projectId: string): Promise<(Supplier & { role: string | null; notes: string | null })[]> {
+    const supabase = createClient();
+
+    // First get the junction table entries
+    const { data: projectSuppliers, error } = await supabase
+        .from('project_suppliers')
+        .select('*')
+        .eq('project_id', projectId);
+
+    if (error) throw new Error(error.message);
+    if (!projectSuppliers.length) return [];
+
+    // Then get the actual supplier details
+    // Note: In a real app we'd use a join, but for simplicity/safety with RLS we'll fetch separately 
+    // or assume the user has access to both.
+    // Let's try a join first in case the user has 'profiles' set up correctly now.
+
+    const { data, error: joinError } = await supabase
+        .from('project_suppliers')
+        .select(`
+            role,
+            notes,
+            supplier:suppliers(*)
+        `)
+        .eq('project_id', projectId);
+
+    if (joinError) throw new Error(joinError.message);
+
+    return data.map((item: any) => ({
+        ...item.supplier,
+        role: item.role,
+        notes: item.notes
+    }));
+}
+
+export async function addSupplierToProject(projectId: string, supplierId: string, role?: string, notes?: string): Promise<void> {
+    const supabase = createClient();
+    // Need org ID for RLS
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Fetch org id from profile
+    const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user.id).single();
+    if (!profile) throw new Error('Profile not found');
+
+    const { error } = await supabase
+        .from('project_suppliers')
+        .insert({
+            organization_id: profile.organization_id,
+            project_id: projectId,
+            supplier_id: supplierId,
+            role,
+            notes
+        });
+
+    if (error) throw new Error(error.message);
+}
+
+export async function removeSupplierFromProject(projectId: string, supplierId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+        .from('project_suppliers')
+        .delete()
+        .eq('project_id', projectId)
+        .eq('supplier_id', supplierId);
+
+    if (error) throw new Error(error.message);
+}

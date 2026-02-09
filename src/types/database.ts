@@ -368,6 +368,68 @@ export interface Attendance {
     updated_at: string;
 }
 
+
+// ============================================
+// Project 360 Module
+// ============================================
+
+export interface SupervisionReport {
+    id: string;
+    organization_id: string;
+    project_id: string;
+    date: string;
+    attendees: string[];
+    notes: string | null;
+    images: string[];
+    status: 'draft' | 'sent';
+    next_visit_date: string | null;
+    created_by: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PurchaseOrder {
+    id: string;
+    organization_id: string;
+    project_id: string;
+    supplier_id: string | null;
+    order_number: string | null;
+    order_date: string;
+    status: 'draft' | 'ordered' | 'shipped' | 'delivered' | 'installed' | 'cancelled';
+    items: InvoiceItem[]; // Reusing InvoiceItem for simplicity
+    total_amount: number;
+    currency: string;
+    pdf_url: string | null;
+    notes: string | null;
+    created_by: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface EmailTemplate {
+    id: string;
+    organization_id: string;
+    name: string;
+    subject: string;
+    body: string;
+    category: 'general' | 'supervision' | 'meeting_summary' | 'onboarding' | 'quote';
+    is_active: boolean;
+    created_by: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ProjectSupplier {
+    id: string;
+    organization_id: string;
+    project_id: string;
+    supplier_id: string;
+    role: string | null;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 // ============================================
 // Database Type for Supabase Client
 // ============================================
@@ -459,6 +521,26 @@ export interface Database {
                 Row: Attendance;
                 Insert: Omit<Attendance, 'id' | 'created_at' | 'updated_at'>;
                 Update: Partial<Omit<Attendance, 'id'>>;
+            };
+            supervision_reports: {
+                Row: SupervisionReport;
+                Insert: Omit<SupervisionReport, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<SupervisionReport, 'id'>>;
+            };
+            purchase_orders: {
+                Row: PurchaseOrder;
+                Insert: Omit<PurchaseOrder, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<PurchaseOrder, 'id'>>;
+            };
+            email_templates: {
+                Row: EmailTemplate;
+                Insert: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<EmailTemplate, 'id'>>;
+            };
+            project_suppliers: {
+                Row: ProjectSupplier;
+                Insert: Omit<ProjectSupplier, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<ProjectSupplier, 'id'>>;
             };
         };
     };

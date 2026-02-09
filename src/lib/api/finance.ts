@@ -206,7 +206,7 @@ export async function getFinanceStats(organizationId: string): Promise<{
     return {
         totalInvoiced: invoices.reduce((sum, inv) => sum + (inv.total || 0), 0),
         totalPaid: invoices.filter((inv) => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total || 0), 0),
-        totalPending: invoices.filter((inv) => inv.status === 'sent' || inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total || 0), 0),
+        totalPending: invoices.filter((inv) => inv.status === 'sent').reduce((sum, inv) => sum + (inv.total || 0), 0),
         totalExpenses: expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0),
         approvedExpenses: expenses.filter((exp) => exp.status === 'approved').reduce((sum, exp) => sum + (exp.amount || 0), 0),
     };
