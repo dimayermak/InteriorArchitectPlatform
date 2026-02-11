@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Modal, EmptyState, LeadStatusBadge } from '@/components/ui';
 import type { Lead, LeadStatus } from '@/types/database';
 import { createLead, updateLead, getLeads } from '@/lib/api/leads';
+import { LeadForm } from '@/components/leads/LeadForm';
 
 type ViewMode = 'table' | 'kanban';
 
@@ -44,36 +45,14 @@ export function LeadsClient({ initialLeads = [], organizationId }: LeadsClientPr
         setIsModalOpen(true);
     };
 
-    const handleSaveLead = async (leadData: Partial<Lead>) => {
-        setLoading(true);
-        try {
-            if (editingLead) {
-                // Update existing lead
-                const updated = await updateLead(editingLead.id, leadData);
-                setLeads(leads.map(l => l.id === editingLead.id ? updated : l));
-            } else {
-                // Create new lead
-                const newLead = await createLead({
-                    organization_id: organizationId,
-                    name: leadData.name || '',
-                    email: leadData.email ?? null,
-                    phone: leadData.phone ?? null,
-                    company: leadData.company ?? null,
-                    source: leadData.source ?? null,
-                    status: 'new',
-                    score: 50,
-                    notes: leadData.notes ?? null,
-                });
-                setLeads([newLead, ...leads]);
-            }
-            setIsModalOpen(false);
-            router.refresh();
-        } catch (error) {
-            console.error('Error saving lead:', error);
-            alert('שגיאה בשמירת הליד');
-        } finally {
-            setLoading(false);
+    const handleSaveLead = (lead: Lead) => {
+        if (editingLead) {
+            setLeads(leads.map(l => l.id === lead.id ? lead : l));
+        } else {
+            setLeads([lead, ...leads]);
         }
+        setIsModalOpen(false);
+        router.refresh();
     };
 
     const handleStatusChange = async (leadId: string, newStatus: LeadStatus) => {
@@ -162,6 +141,7 @@ export function LeadsClient({ initialLeads = [], organizationId }: LeadsClientPr
                 lead={editingLead}
                 onSave={handleSaveLead}
                 loading={loading}
+                organizationId={organizationId}
             />
         </div>
     );
@@ -366,32 +346,16 @@ function LeadModal({
     lead,
     onSave,
     loading,
+    organizationId,
 }: {
     isOpen: boolean;
     onClose: () => void;
     lead: Lead | null;
-    onSave: (data: Partial<Lead>) => void;
+    onSave: (lead: Lead) => void;
     loading: boolean;
+    organizationId: string;
 }) {
-    const [formData, setFormData] = useState({
-        name: lead?.name || '',
-        email: lead?.email || '',
-        phone: lead?.phone || '',
-        company: lead?.company || '',
-        source: lead?.source || '',
-        notes: lead?.notes || '',
-        value: lead?.value?.toString() || '',
-        expected_close_date: lead?.expected_close_date || '',
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave({
-            ...formData,
-            value: formData.value ? parseFloat(formData.value) : undefined,
-            expected_close_date: formData.expected_close_date || undefined,
-        });
-    };
+    // LeadForm handles internal state, no need for it here
 
     return (
         <Modal
@@ -400,126 +364,12 @@ function LeadModal({
             title={lead ? 'עריכת ליד' : 'ליד חדש'}
             size="lg"
         >
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            שם מלא *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            required
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="שם הליד"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            חברה
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.company}
-                            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="שם החברה"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            אימייל
-                        </label>
-                        <input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="email@example.com"
-                            dir="ltr"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            טלפון
-                        </label>
-                        <input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="050-0000000"
-                            dir="ltr"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            שווי עסקה משוער (₪)
-                        </label>
-                        <input
-                            type="number"
-                            value={formData.value}
-                            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                            placeholder="0"
-                            dir="ltr"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                            תאריך סגירה משוער
-                        </label>
-                        <input
-                            type="date"
-                            value={formData.expected_close_date}
-                            onChange={(e) => setFormData({ ...formData, expected_close_date: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        מקור
-                    </label>
-                    <select
-                        value={formData.source}
-                        onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                    >
-                        <option value="">בחר מקור</option>
-                        <option value="אתר אינטרנט">אתר אינטרנט</option>
-                        <option value="המלצה">המלצה</option>
-                        <option value="אינסטגרם">אינסטגרם</option>
-                        <option value="פייסבוק">פייסבוק</option>
-                        <option value="גוגל">גוגל</option>
-                        <option value="אחר">אחר</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        הערות
-                    </label>
-                    <textarea
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        rows={3}
-                        className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all resize-none"
-                        placeholder="הערות על הליד..."
-                    />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-                    <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
-                        ביטול
-                    </Button>
-                    <Button type="submit" disabled={loading}>
-                        {loading ? 'שומר...' : lead ? 'שמירה' : 'יצירת ליד'}
-                    </Button>
-                </div>
-            </form>
+            <LeadForm
+                organizationId={organizationId}
+                initialData={lead}
+                onSuccess={onSave}
+                onCancel={onClose}
+            />
         </Modal>
     );
 }

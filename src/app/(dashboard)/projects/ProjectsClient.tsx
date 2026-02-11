@@ -13,6 +13,7 @@ import { getClients } from '@/lib/api/clients';
 import type { Project, Client } from '@/types/database';
 import { Plus, Search, FolderOpen, MoreVertical, Calendar, User, Trash2, Eye } from 'lucide-react';
 
+import { ProjectForm } from '@/components/projects/ProjectForm';
 interface ProjectsClientProps {
     organizationId: string;
 }
@@ -31,6 +32,13 @@ const typeLabels: Record<string, string> = {
     renovation: 'שיפוץ',
     consultation: 'ייעוץ',
     mixed: 'משולב',
+};
+
+const priorityColors: Record<string, string> = {
+    low: 'bg-slate-500',
+    medium: 'bg-blue-500',
+    high: 'bg-orange-500',
+    urgent: 'bg-red-500',
 };
 
 export function ProjectsClient({ organizationId }: ProjectsClientProps) {
@@ -75,35 +83,10 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
         return matchesSearch && matchesStatus;
     });
 
-    const handleCreateProject = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const newProject = await createProject({
-                organization_id: organizationId,
-                client_id: formData.client_id,
-                name: formData.name,
-                type: formData.type as Project['type'],
-                budget: formData.budget ? parseFloat(formData.budget) : null,
-                description: formData.description || null,
-                priority: formData.priority as Project['priority'],
-                start_date: formData.start_date || null,
-            });
-            setProjects([newProject, ...projects]);
-            setIsModalOpen(false);
-            setFormData({
-                name: '',
-                client_id: '',
-                type: 'interior_design',
-                budget: '',
-                description: '',
-                priority: 'medium',
-                start_date: ''
-            });
-            router.push(`/projects/${newProject.id}`);
-        } catch (error: any) {
-            console.error('Error creating project:', error);
-            alert(`שגיאה ביצירת פרויקט: ${error.message || 'אנא נסו שוב'}`);
-        }
+    const handleCreateSuccess = (newProject: Project) => {
+        setProjects([newProject, ...projects]);
+        setIsModalOpen(false);
+        router.push(`/projects/${newProject.id}`);
     };
 
     const handleDelete = async (id: string) => {
@@ -191,92 +174,12 @@ export function ProjectsClient({ organizationId }: ProjectsClientProps) {
 
             {/* Create Modal */}
             <Modal isOpen={isModalOpen} onClose={closeModal} title="פרויקט חדש" size="lg">
-                <form onSubmit={handleCreateProject} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                            <Input
-                                label="שם הפרויקט"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                required
-                                placeholder="למשל: שיפוץ דירה - רחוב הרצל"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">לקוח</label>
-                            <select
-                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
-                                value={formData.client_id}
-                                onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                                required
-                            >
-                                <option value="">בחרו לקוח</option>
-                                {clients.map((client) => (
-                                    <option key={client.id} value={client.id}>{client.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">סוג פרויקט</label>
-                            <select
-                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
-                                value={formData.type}
-                                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            >
-                                {Object.entries(typeLabels).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">עדיפות</label>
-                            <select
-                                className="w-full h-11 px-4 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary"
-                                value={formData.priority}
-                                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                            >
-                                <option value="low">נמוכה</option>
-                                <option value="medium">בינונית</option>
-                                <option value="high">גבוהה</option>
-                                <option value="urgent">דחופה</option>
-                            </select>
-                        </div>
-
-                        <Input
-                            type="number"
-                            label="תקציב (₪)"
-                            value={formData.budget}
-                            onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                            placeholder="50000"
-                            dir="ltr"
-                        />
-
-                        <Input
-                            type="date"
-                            label="תאריך התחלה"
-                            value={formData.start_date}
-                            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                        />
-
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-foreground mb-1.5">תיאור הפרויקט</label>
-                            <textarea
-                                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary min-h-[100px] resize-none"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="תיאור קצר של הפרויקט..."
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-3 pt-4 border-t border-border">
-                        <Button type="submit" className="flex-1">צור פרויקט</Button>
-                        <Button type="button" variant="outline" onClick={closeModal}>ביטול</Button>
-                    </div>
-                </form>
+                <ProjectForm
+                    organizationId={organizationId}
+                    clients={clients}
+                    onSuccess={handleCreateSuccess}
+                    onCancel={closeModal}
+                />
             </Modal>
         </div>
     );
@@ -293,71 +196,72 @@ function ProjectCard({ project, client, onDelete }: ProjectCardProps) {
     const status = statusLabels[project.status] || { label: project.status, variant: 'default' };
 
     return (
-        <Card className="hover:shadow-lg transition-shadow group">
-            <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <Link href={`/projects/${project.id}`}>
-                            <CardTitle className="text-lg hover:text-primary transition-colors cursor-pointer">
+        <Link href={`/projects/${project.id}`} className="block h-full">
+            <Card className="hover:shadow-lg transition-all duration-200 h-full border-border/50 hover:border-primary/20 group cursor-pointer relative overflow-hidden">
+                <div className={`absolute top-0 left-0 w-1 h-full ${priorityColors[project.priority]}`} />
+                <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                            <CardTitle className="text-lg group-hover:text-primary transition-colors">
                                 {project.name}
                             </CardTitle>
-                        </Link>
-                        {client && (
-                            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                                <User className="w-3 h-3" />
-                                {client.name}
-                            </p>
-                        )}
-                    </div>
-                    <div className="relative">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => setShowMenu(!showMenu)}
-                        >
-                            <MoreVertical className="w-4 h-4" />
-                        </Button>
-                        {showMenu && (
-                            <div className="absolute left-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-                                <Link href={`/projects/${project.id}`}>
-                                    <button className="w-full px-4 py-2 text-sm text-right hover:bg-muted flex items-center gap-2">
-                                        <Eye className="w-4 h-4" />
-                                        צפייה
+                            {client && (
+                                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {client.name}
+                                </p>
+                            )}
+                        </div>
+                        <div className="relative">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setShowMenu(!showMenu)}
+                            >
+                                <MoreVertical className="w-4 h-4" />
+                            </Button>
+                            {showMenu && (
+                                <div className="absolute left-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
+                                    <Link href={`/projects/${project.id}`}>
+                                        <button className="w-full px-4 py-2 text-sm text-right hover:bg-muted flex items-center gap-2">
+                                            <Eye className="w-4 h-4" />
+                                            צפייה
+                                        </button>
+                                    </Link>
+                                    <button
+                                        onClick={() => onDelete(project.id)}
+                                        className="w-full px-4 py-2 text-sm text-right hover:bg-muted text-destructive flex items-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        מחיקה
                                     </button>
-                                </Link>
-                                <button
-                                    onClick={() => onDelete(project.id)}
-                                    className="w-full px-4 py-2 text-sm text-right hover:bg-muted text-destructive flex items-center gap-2"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                    מחיקה
-                                </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-3">
+                        <Badge variant={status.variant}>{status.label}</Badge>
+                        <span className="text-xs text-muted-foreground">{typeLabels[project.type] || project.type}</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {project.start_date && (
+                            <div className="flex items-center gap-1">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {new Date(project.start_date).toLocaleDateString('he-IL')}
+                            </div>
+                        )}
+                        {project.budget && (
+                            <div className="tabular-nums">
+                                ₪{project.budget.toLocaleString()}
                             </div>
                         )}
                     </div>
-                </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <div className="flex items-center justify-between mb-3">
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                    <span className="text-xs text-muted-foreground">{typeLabels[project.type] || project.type}</span>
-                </div>
-
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {project.start_date && (
-                        <div className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {new Date(project.start_date).toLocaleDateString('he-IL')}
-                        </div>
-                    )}
-                    {project.budget && (
-                        <div className="tabular-nums">
-                            ₪{project.budget.toLocaleString()}
-                        </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </Link>
     );
 }

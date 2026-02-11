@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Upload, Image as ImageIcon, FileText, Download, Trash2, ExternalLink } from 'lucide-react';
+import { Upload, Image as ImageIcon, FileText, Download, Trash2, ExternalLink, Grid } from 'lucide-react';
 
 interface ProjectGalleryProps {
     projectId: string;
@@ -25,67 +25,101 @@ const INITIAL_FILES = [
 export function ProjectGallery({ projectId }: ProjectGalleryProps) {
     const [images, setImages] = useState(INITIAL_IMAGES);
     const [files, setFiles] = useState(INITIAL_FILES);
-    const [activeTab, setActiveTab] = useState<'all' | 'renders' | 'photos' | 'plans'>('all');
+    const [activeTab, setActiveTab] = useState<'images' | 'files'>('images');
+    const [localImages, setLocalImages] = useState(images);
+    const [localFiles, setLocalFiles] = useState(files);
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Mock upload
+        if (activeTab === 'images') {
+            const newImage = {
+                id: Math.random().toString(),
+                url: URL.createObjectURL(file), // Using local URL for preview
+                title: file.name, // Using file name as title for now
+                type: file.type.startsWith('image/') ? 'photo' : 'render', // Basic type detection
+                date: new Date().toISOString().split('T')[0] // Current date
+            };
+            setLocalImages([newImage, ...localImages]);
+        } else {
+            const newFile = {
+                id: Math.random().toString(),
+                name: file.name,
+                type: file.name.split('.').pop() || 'file',
+                size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, // Convert bytes to MB
+                date: new Date().toISOString().split('T')[0]
+            };
+            setLocalFiles([newFile, ...localFiles]);
+        }
+    };
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
-                    {['all', 'renders', 'photos', 'plans'].map((tab) => (
+                    {['images', 'files'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === tab
-                                    ? 'bg-white text-primary shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-primary shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            {tab === 'all' && 'הכל'}
-                            {tab === 'renders' && 'הדמיות'}
-                            {tab === 'photos' && 'תמונות מהשטח'}
-                            {tab === 'plans' && 'תוכניות ומסמכים'}
+                            {tab === 'images' && 'תמונות'}
+                            {tab === 'files' && 'קבצים'}
                         </button>
                     ))}
                 </div>
-                <Button className="gap-2">
-                    <Upload className="w-4 h-4" />
-                    העלאת קובץ
-                </Button>
+                <div className="flex items-center gap-2">
+                    <label>
+                        <input type="file" className="hidden" onChange={handleFileUpload} accept={activeTab === 'images' ? "image/*" : "*"} />
+                        <Button variant="outline" className="gap-2 h-9 cursor-pointer">
+                            <Upload className="w-4 h-4" />
+                            <span>העלאה</span>
+                        </Button>
+                    </label>
+                    <Button variant="ghost" size="icon">
+                        <Grid className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
 
             {/* Images Grid */}
-            {(activeTab === 'all' || activeTab === 'renders' || activeTab === 'photos') && (
+            {activeTab === 'images' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {images
-                        .filter(img => activeTab === 'all' || (activeTab === 'renders' && img.type === 'render') || (activeTab === 'photos' && img.type === 'photo'))
-                        .map((image) => (
-                            <div key={image.id} className="group relative aspect-video bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                                <img src={image.url} alt={image.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-gray-900">
-                                        <ExternalLink className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="destructive" size="icon" className="h-8 w-8 rounded-full">
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6">
-                                    <h3 className="text-white text-sm font-medium truncate">{image.title}</h3>
-                                    <p className="text-white/80 text-xs">{image.date}</p>
-                                </div>
-                            </div>
-                        ))}
-
                     {/* Upload Placeholder */}
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer aspect-video">
-                        <ImageIcon className="w-8 h-8 mb-2" />
-                        <span className="text-sm font-medium">הוסף תמונה</span>
-                    </div>
+                    <label className="cursor-pointer">
+                        <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
+                        <div className="border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-colors aspect-video h-full">
+                            <ImageIcon className="w-8 h-8 mb-2" />
+                            <span className="text-sm font-medium">הוסף תמונה</span>
+                        </div>
+                    </label>
+                    {localImages.map((image) => (
+                        <div key={image.id} className="group relative aspect-video bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                            <img src={image.url} alt={image.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-gray-900">
+                                    <ExternalLink className="w-4 h-4" />
+                                </Button>
+                                <Button variant="destructive" size="icon" className="h-8 w-8 rounded-full">
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6">
+                                <h3 className="text-white text-sm font-medium truncate">{image.title}</h3>
+                                <p className="text-white/80 text-xs">{image.date}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
             {/* Files List */}
-            {(activeTab === 'all' || activeTab === 'plans') && (
+            {activeTab === 'files' && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">

@@ -80,65 +80,73 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="hover:shadow-lg transition-shadow duration-200 border-primary/10 bg-gradient-to-br from-background to-primary/5">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">פרויקטים פעילים</p>
-                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.projects.active}</h3>
-                                <p className="text-xs text-muted-foreground mt-1">מתוך {stats.projects.total} סה״כ</p>
+                <Link href="/projects">
+                    <Card className="hover:shadow-lg transition-shadow duration-200 border-primary/10 bg-gradient-to-br from-background to-primary/5 cursor-pointer h-full">
+                        <CardContent className="p-6">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">פרויקטים פעילים</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.projects.active}</h3>
+                                    <p className="text-xs text-muted-foreground mt-1">מתוך {stats.projects.total} סה״כ</p>
+                                </div>
+                                <div className="p-3 bg-primary/10 rounded-xl">
+                                    <FolderOpen className="w-5 h-5 text-primary" />
+                                </div>
                             </div>
-                            <div className="p-3 bg-primary/10 rounded-xl">
-                                <FolderOpen className="w-5 h-5 text-primary" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card className="hover:shadow-lg transition-shadow duration-200 border-indigo-500/10 bg-gradient-to-br from-background to-indigo-500/5">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">לידים חדשים</p>
-                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.leads.new}</h3>
-                                <p className="text-xs text-muted-foreground mt-1">{stats.leads.qualified} בתהליך</p>
+                <Link href="/leads">
+                    <Card className="hover:shadow-lg transition-shadow duration-200 border-indigo-500/10 bg-gradient-to-br from-background to-indigo-500/5 cursor-pointer h-full">
+                        <CardContent className="p-6">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">לידים חדשים</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.leads.new}</h3>
+                                    <p className="text-xs text-muted-foreground mt-1">{stats.leads.qualified} בתהליך</p>
+                                </div>
+                                <div className="p-3 bg-indigo-500/10 rounded-xl">
+                                    <Users className="w-5 h-5 text-indigo-500" />
+                                </div>
                             </div>
-                            <div className="p-3 bg-indigo-500/10 rounded-xl">
-                                <Users className="w-5 h-5 text-indigo-500" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card className="hover:shadow-lg transition-shadow duration-200 border-emerald-500/10 bg-gradient-to-br from-background to-emerald-500/5">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">לקוחות פעילים</p>
-                                <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.clients.active}</h3>
-                                <p className="text-xs text-muted-foreground mt-1">מתוך {stats.clients.total} סה״כ</p>
+                <Link href="/clients">
+                    <Card className="hover:shadow-lg transition-shadow duration-200 border-emerald-500/10 bg-gradient-to-br from-background to-emerald-500/5 cursor-pointer h-full">
+                        <CardContent className="p-6">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">לקוחות פעילים</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.clients.active}</h3>
+                                    <p className="text-xs text-muted-foreground mt-1">מתוך {stats.clients.total} סה״כ</p>
+                                </div>
+                                <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                    <Users className="w-5 h-5 text-emerald-500" />
+                                </div>
                             </div>
-                            <div className="p-3 bg-emerald-500/10 rounded-xl">
-                                <Users className="w-5 h-5 text-emerald-500" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card className="hover:shadow-lg transition-shadow duration-200 border-amber-500/10 bg-gradient-to-br from-background to-amber-500/5">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">חשבוניות פתוחות</p>
-                                <h3 className="text-3xl font-bold mt-2 tabular-nums">₪{stats.finance.pendingInvoices.toLocaleString()}</h3>
-                                <p className="text-xs text-muted-foreground mt-1">ממתין לתשלום</p>
+                <Link href="/finance">
+                    <Card className="hover:shadow-lg transition-shadow duration-200 border-amber-500/10 bg-gradient-to-br from-background to-amber-500/5 cursor-pointer h-full">
+                        <CardContent className="p-6">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">חשבוניות פתוחות</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">₪{stats.finance.pendingInvoices.toLocaleString()}</h3>
+                                    <p className="text-xs text-muted-foreground mt-1">ממתין לתשלום</p>
+                                </div>
+                                <div className="p-3 bg-amber-500/10 rounded-xl">
+                                    <TrendingUp className="w-5 h-5 text-amber-500" />
+                                </div>
                             </div>
-                            <div className="p-3 bg-amber-500/10 rounded-xl">
-                                <TrendingUp className="w-5 h-5 text-amber-500" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Charts Overview */}
@@ -197,9 +205,9 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                             {upcomingTasks.map((task) => (
                                 <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-border transition-colors">
                                     <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${task.priority === 'urgent' ? 'bg-red-500' :
-                                            task.priority === 'high' ? 'bg-orange-500' :
-                                                task.priority === 'medium' ? 'bg-yellow-500' :
-                                                    'bg-green-500'
+                                        task.priority === 'high' ? 'bg-orange-500' :
+                                            task.priority === 'medium' ? 'bg-yellow-500' :
+                                                'bg-green-500'
                                         }`} />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-sm truncate">{task.title}</p>
