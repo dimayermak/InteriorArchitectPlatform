@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui';
 import { Home, Bell, Inbox, ChevronRight, ChevronLeft, Plus, Settings } from 'lucide-react';
 import AgentActivityFeed from '@/components/ai/AgentActivityFeed';
 import AgentSettingsPanel from '@/components/ai/AgentSettingsPanel';
+import { createClient } from '@/lib/supabase/client';
 
 // Navigation Items
 const boards = [
@@ -23,15 +24,21 @@ const boards = [
     { id: 'b-10', name: 'תבניות', type: 'board', color: 'bg-indigo-500', path: '/templates' },
 ];
 
-// TODO: Replace with real org/user IDs from auth context
 const TEMP_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-const TEMP_USER_ID = 'temp-user-id';
 
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const [agentPanelOpen, setAgentPanelOpen] = useState(false);
     const [agentSettingsOpen, setAgentSettingsOpen] = useState(false);
+    const [userId, setUserId] = useState<string>('');
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.auth.getUser().then(({ data }) => {
+            if (data.user) setUserId(data.user.id);
+        });
+    }, []);
 
     return (
         <>
@@ -177,7 +184,7 @@ export function Sidebar() {
             {/* AI Agent Panels */}
             <AgentActivityFeed
                 organizationId={TEMP_ORG_ID}
-                userId={TEMP_USER_ID}
+                userId={userId}
                 isOpen={agentPanelOpen}
                 onClose={() => setAgentPanelOpen(false)}
             />

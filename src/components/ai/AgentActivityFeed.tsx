@@ -56,6 +56,7 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<'feed' | 'briefing'>('feed');
     const [loadingBriefing, setLoadingBriefing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchActions = useCallback(async () => {
         setIsLoading(true);
@@ -84,20 +85,28 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
     }, [organizationId, fetchActions]);
 
     const handleApprove = async (actionId: string) => {
+        setError(null);
         try {
             await approveAction(actionId, userId);
             setActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'approved' as const } : a));
-        } catch (err) {
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'שגיאה באישור הפעולה';
+            setError(msg);
             console.error('Failed to approve action:', err);
+            setTimeout(() => setError(null), 5000);
         }
     };
 
     const handleDismiss = async (actionId: string) => {
+        setError(null);
         try {
             await dismissAction(actionId);
             setActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'dismissed' as const } : a));
-        } catch (err) {
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'שגיאה בדחיית הפעולה';
+            setError(msg);
             console.error('Failed to dismiss action:', err);
+            setTimeout(() => setError(null), 5000);
         }
     };
 
@@ -212,6 +221,25 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
 
             {/* Content */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
+                {/* Error Banner */}
+                {error && (
+                    <div style={{
+                        padding: '10px 14px',
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        borderRadius: '8px',
+                        marginBottom: '12px',
+                        color: '#f87171',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}>
+                        <span>❌</span>
+                        <span>{error}</span>
+                        <button onClick={() => setError(null)} style={{ marginRight: 'auto', background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                    </div>
+                )}
                 {activeTab === 'feed' ? (
                     <>
                         {isLoading ? (
