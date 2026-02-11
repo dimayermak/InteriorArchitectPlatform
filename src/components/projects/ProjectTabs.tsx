@@ -8,6 +8,7 @@ import { ProjectSuppliers } from './ProjectSuppliers';
 import { ProjectOrders } from './ProjectOrders';
 import { ProjectSupervision } from './ProjectSupervision';
 import { ProjectFinance } from './ProjectFinance';
+import { ProjectGallery } from './ProjectGallery';
 
 interface ProjectTabsProps {
     project: Project & { client: { name: string } | null };
@@ -26,10 +27,11 @@ export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabs
                 <TabsTrigger value="orders">הזמנות רכש</TabsTrigger>
                 <TabsTrigger value="supervision">פיקוח</TabsTrigger>
                 <TabsTrigger value="finance">פיננסי</TabsTrigger>
+                <TabsTrigger value="gallery">גלריה וקבצים</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
-                <ProjectOverview project={project} stats={stats} statusLabels={statusLabels} />
+                <ProjectOverview project={project} stats={stats} statusLabels={statusLabels} tasks={tasks} />
             </TabsContent>
 
             <TabsContent value="plan">
@@ -50,6 +52,10 @@ export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabs
 
             <TabsContent value="finance">
                 <ProjectFinance projectId={project.id} budget={project.budget || 0} />
+            </TabsContent>
+
+            <TabsContent value="gallery">
+                <ProjectGallery projectId={project.id} />
             </TabsContent>
         </Tabs>
     );

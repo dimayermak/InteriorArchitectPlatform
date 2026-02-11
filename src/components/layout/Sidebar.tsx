@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
-import { Home, Bell, Inbox, ChevronRight, ChevronLeft, Plus, Settings } from 'lucide-react';
+import { Home, Bell, Inbox, ChevronRight, ChevronLeft, Plus, Settings, User } from 'lucide-react';
 import AgentActivityFeed from '@/components/ai/AgentActivityFeed';
 import AgentSettingsPanel from '@/components/ai/AgentSettingsPanel';
 import { createClient } from '@/lib/supabase/client';
@@ -119,12 +119,23 @@ export function Sidebar() {
                         </Button>
                     </div>
 
-                    {/* Quick Create Button */}
-                    <div className="p-3">
-                        <Button className="w-full justify-start gap-3 rounded-xl shadow-lg shadow-primary/20">
-                            <Plus className="w-5 h-5" aria-hidden="true" />
-                            יצירת חדש
-                        </Button>
+                    {/* Quick Actions */}
+                    <div className="p-3 grid grid-cols-3 gap-2">
+                        <Link href="/projects/new">
+                            <Button variant="outline" size="icon" className="w-full h-10 rounded-xl border-dashed border-2 hover:border-primary hover:text-primary hover:bg-primary/5" title="פרויקט חדש">
+                                <Home className="w-4 h-4" />
+                            </Button>
+                        </Link>
+                        <Link href="/leads/new">
+                            <Button variant="outline" size="icon" className="w-full h-10 rounded-xl border-dashed border-2 hover:border-purple-500 hover:text-purple-500 hover:bg-purple-50" title="ליד חדש">
+                                <User className="w-4 h-4" />
+                            </Button>
+                        </Link>
+                        <Link href="/tasks/new">
+                            <Button variant="outline" size="icon" className="w-full h-10 rounded-xl border-dashed border-2 hover:border-green-500 hover:text-green-500 hover:bg-green-50" title="משימה חדשה">
+                                <Plus className="w-4 h-4" />
+                            </Button>
+                        </Link>
                     </div>
 
                     {/* Navigation Tree */}

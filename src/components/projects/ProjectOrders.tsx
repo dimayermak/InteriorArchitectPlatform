@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -145,9 +146,15 @@ export function ProjectOrders({ projectId }: ProjectOrdersProps) {
                                 <div key={order.id} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted/20 transition-colors gap-4">
                                     <div className="flex-1 space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-lg">
-                                                {getSupplierName(order.supplier_id)}
-                                            </span>
+                                            {order.supplier_id ? (
+                                                <Link href={`/suppliers/${order.supplier_id}`} className="font-semibold text-lg hover:text-primary hover:underline transition-colors">
+                                                    {getSupplierName(order.supplier_id)}
+                                                </Link>
+                                            ) : (
+                                                <span className="font-semibold text-lg">
+                                                    {getSupplierName(order.supplier_id)}
+                                                </span>
+                                            )}
                                             <span className={`flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>
                                                 {statusInfo.icon}
                                                 {statusInfo.label}
