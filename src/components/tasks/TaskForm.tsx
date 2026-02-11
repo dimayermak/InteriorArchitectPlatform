@@ -25,17 +25,18 @@ export function TaskForm({ organizationId, projects, onSuccess, onCancel }: Task
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // NOTE: We need to implement createTask in api/tasks or similar. 
-        // For now, I'll assume it exists or implement it inline if I can't import it.
-        // But since I can't create the API file in the same step easily, I will implement a fetch call here or valid mock.
-        // Actually, I should create the API function first? 
-        // I'll use a direct fetch to Supabase or stub it. 
-        // PROPER WAY: Use the standard Supabase client.
 
         try {
-            // Placeholder for API call
-            const { createClientComponentClient } = await import('@supabase/auth-helpers-nextjs');
-            const supabase = createClientComponentClient();
+            // Dynamically import the client creator to avoid build-time issues if any
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+
+            const { data: userResponse } = await supabase.auth.getUser();
+            const user = userResponse.user;
+
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
 
             const { data, error } = await supabase
                 .from('tasks')
@@ -47,7 +48,9 @@ export function TaskForm({ organizationId, projects, onSuccess, onCancel }: Task
                     due_date: formData.due_date || null,
                     description: formData.description || null,
                     status: 'todo',
-                    order_index: 0
+                    order_index: 0,
+                    assigned_to: user.id, // Assign to creator by default
+                    created_by: user.id
                 })
                 .select()
                 .single();
@@ -56,7 +59,7 @@ export function TaskForm({ organizationId, projects, onSuccess, onCancel }: Task
             onSuccess(data as Task);
         } catch (error: any) {
             console.error('Error creating task:', error);
-            alert(`שגיאה ביצירת משימה: ${error.message || 'אנא נסו שוב'}`);
+            // alert(`שגיאה ביצירת משימה: ${error.message || 'אנא נסו שוב'}`);
         } finally {
             setLoading(false);
         }
