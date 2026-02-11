@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
 // ============================================
 // Types
 // ============================================
@@ -85,22 +88,31 @@ export async function getPendingActions(organizationId: string): Promise<AgentAc
     return getAgentActions(organizationId, { status: 'pending' });
 }
 
-export async function approveAction(actionId: string, userId: string): Promise<AgentAction> {
-    const supabase = createClient();
+export interface ExecuteResult {
+    success: boolean;
+    created_type: 'meeting' | 'task' | 'escalation' | 'acknowledged';
+    created: Record<string, unknown> | null;
+    message_he: string;
+    already_executed?: boolean;
+}
 
-    const { data, error } = await supabase
-        .from('agent_actions_log')
-        .update({
-            status: 'approved',
-            approved_by: userId,
-            approved_at: new Date().toISOString(),
-        })
-        .eq('id', actionId)
-        .select()
-        .single();
+export async function approveAction(actionId: string, userId: string): Promise<ExecuteResult> {
+    // Call the execute-action endpoint which creates real records + marks as executed
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/agent-brain/execute-action`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action_id: actionId, user_id: userId }),
+    });
 
-    if (error) throw new Error(error.message);
-    return data;
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Execute action failed: ${response.status}`);
+    }
+
+    return response.json();
 }
 
 export async function dismissAction(actionId: string): Promise<AgentAction> {
@@ -163,9 +175,6 @@ export async function upsertAgentSettings(
 // ============================================
 // Edge Function API — trigger analysis
 // ============================================
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 async function callAgentBrain(endpoint: string, organizationId: string): Promise<unknown> {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/agent-brain/${endpoint}`, {

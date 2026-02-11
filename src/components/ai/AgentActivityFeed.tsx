@@ -57,6 +57,8 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
     const [activeTab, setActiveTab] = useState<'feed' | 'briefing'>('feed');
     const [loadingBriefing, setLoadingBriefing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [executingId, setExecutingId] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const fetchActions = useCallback(async () => {
         setIsLoading(true);
@@ -86,14 +88,21 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
 
     const handleApprove = async (actionId: string) => {
         setError(null);
+        setSuccessMessage(null);
+        setExecutingId(actionId);
         try {
-            await approveAction(actionId, userId);
-            setActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'approved' as const } : a));
+            const result = await approveAction(actionId, userId);
+            setActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'executed' as const } : a));
+            // Show success message
+            setSuccessMessage(result.message_he || 'בוצע בהצלחה ✓');
+            setTimeout(() => setSuccessMessage(null), 5000);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'שגיאה באישור הפעולה';
             setError(msg);
-            console.error('Failed to approve action:', err);
+            console.error('Failed to execute action:', err);
             setTimeout(() => setError(null), 5000);
+        } finally {
+            setExecutingId(null);
         }
     };
 
@@ -240,6 +249,25 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
                         <button onClick={() => setError(null)} style={{ marginRight: 'auto', background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '14px' }}>✕</button>
                     </div>
                 )}
+                {/* Success Banner */}
+                {successMessage && (
+                    <div style={{
+                        padding: '10px 14px',
+                        background: 'rgba(34, 197, 94, 0.12)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        borderRadius: '8px',
+                        marginBottom: '12px',
+                        color: '#22c55e',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}>
+                        <span>✅</span>
+                        <span>{successMessage}</span>
+                        <button onClick={() => setSuccessMessage(null)} style={{ marginRight: 'auto', background: 'none', border: 'none', color: '#22c55e', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                    </div>
+                )}
                 {activeTab === 'feed' ? (
                     <>
                         {isLoading ? (
@@ -259,6 +287,7 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
                                             <ActionCard
                                                 key={action.id}
                                                 action={action}
+                                                isExecuting={executingId === action.id}
                                                 onApprove={handleApprove}
                                                 onDismiss={handleDismiss}
                                                 formatTime={formatTime}
@@ -403,8 +432,10 @@ function ActionCard({
     onApprove,
     onDismiss,
     formatTime,
+    isExecuting,
 }: {
     action: AgentAction;
+    isExecuting?: boolean;
     onApprove?: (id: string) => void;
     onDismiss?: (id: string) => void;
     formatTime: (date: string) => string;
@@ -467,18 +498,20 @@ function ActionCard({
                     <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                             onClick={() => onApprove(action.id)}
+                            disabled={isExecuting}
                             style={{
                                 padding: '4px 12px',
-                                background: 'rgba(34, 197, 94, 0.15)',
+                                background: isExecuting ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.15)',
                                 color: '#22c55e',
                                 border: '1px solid rgba(34, 197, 94, 0.3)',
                                 borderRadius: '6px',
                                 fontSize: '11px',
                                 fontWeight: 500,
-                                cursor: 'pointer',
+                                cursor: isExecuting ? 'wait' : 'pointer',
+                                opacity: isExecuting ? 0.7 : 1,
                             }}
                         >
-                            ✓ אשר
+                            {isExecuting ? '⏳ מבצע...' : '✓ אשר'}
                         </button>
                         <button
                             onClick={() => onDismiss(action.id)}
