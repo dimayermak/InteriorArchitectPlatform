@@ -64,31 +64,16 @@ export default function Hero() {
                     ועד למעקב כספי מלא — הכל בפלטפורמה אחת בעברית.
                 </motion.p>
 
-                {/* Stats Row */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.5 }}
-                    className="flex justify-center gap-10 mb-12"
-                >
-                    {stats.map((s, i) => (
-                        <div key={i} className="text-center">
-                            <div className="text-3xl font-black text-foreground">{s.value}</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
-                        </div>
-                    ))}
-                </motion.div>
-
                 {/* CTA Buttons */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+                    transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
                     className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                 >
                     <Link href="/register">
                         <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:scale-105 transition-all duration-300 group">
-                            מתחילים בחינם
+                            התחילו עכשיו
                             <ArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
                         </Button>
                     </Link>

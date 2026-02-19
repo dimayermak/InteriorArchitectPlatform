@@ -40,15 +40,13 @@ export default function CTA() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/register">
                             <Button size="lg" className="rounded-full px-12 h-16 text-xl font-bold hover:scale-105 transition-transform shadow-xl shadow-primary/20">
-                                מתחילים עכשיו בחינם
+                                התחילו עכשיו
                                 <ArrowLeft className="mr-2 h-6 w-6" />
                             </Button>
                         </Link>
                     </div>
 
-                    <p className="mt-8 text-sm text-muted-foreground">
-                        ללא צורך באשראי • ביטול בכל עת • תמיכה מלאה בעברית
-                    </p>
+
 
                 </motion.div>
             </div>
