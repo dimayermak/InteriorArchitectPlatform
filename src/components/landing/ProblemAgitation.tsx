@@ -1,20 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { XCircle, CheckCircle, FileX, MessageSquareWarning, DollarSign, CalendarX, Zap, Layers, RefreshCw } from 'lucide-react';
+import { XCircle, CheckCircle, Clock, FolderX, DollarSign, Users, LayoutDashboard, Share2, CreditCard, Bot } from 'lucide-react';
 
 const painPoints = [
-    { icon: FileX, text: 'הצעות מחיר שאבדו במייל', color: 'text-red-500' },
-    { icon: MessageSquareWarning, text: 'הודעות מפוזרות בווטסאפ', color: 'text-orange-500' },
-    { icon: DollarSign, text: 'האם הפרויקט רווחי בכלל?', color: 'text-yellow-500' },
-    { icon: CalendarX, text: 'דדליינים שפוספסו', color: 'text-pink-500' },
+    { icon: FolderX, text: 'לידים שהלכו לאיבוד בלי מעקב', color: 'text-red-500' },
+    { icon: Clock, text: 'שעות עבודה לא מתועדות', color: 'text-orange-500' },
+    { icon: DollarSign, text: 'חשבוניות ורכש בגיליון אקסל', color: 'text-yellow-500' },
+    { icon: Users, text: 'הלקוח שואל "מה קורה?" כל שבוע', color: 'text-pink-500' },
 ];
 
 const solutionPoints = [
-    { icon: Layers, text: 'הכל במקום אחד מסודר', color: 'text-blue-500' },
-    { icon: Zap, text: 'תהליכים אוטומטיים וחכמים', color: 'text-purple-500' },
-    { icon: RefreshCw, text: 'סנכרון מלא בזמן אמת', color: 'text-green-500' },
-    { icon: CheckCircle, text: 'שקט נפשי ומקצועיות שיא', color: 'text-cyan-500' },
+    { icon: LayoutDashboard, text: 'דשבורד עם כל המידע בזמן אמת', color: 'text-blue-500' },
+    { icon: CreditCard, text: 'כספים, חשבוניות ורכש בפלטפורמה', color: 'text-green-500' },
+    { icon: Share2, text: 'פורטל לקוח — שקיפות ללא מאמץ', color: 'text-purple-500' },
+    { icon: Bot, text: 'סוכן AI שעוזר לנהל חכם יותר', color: 'text-cyan-500' },
 ];
 
 export default function ProblemAgitation() {

@@ -3,7 +3,13 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Clock, Share2, Bot } from 'lucide-react';
+
+const stats = [
+    { value: '10', label: 'מודולים מובנים' },
+    { value: '100%', label: 'בעברית RTL' },
+    { value: '∞', label: 'פרויקטים ולקוחות' },
+];
 
 export default function Hero() {
     return (
@@ -30,7 +36,7 @@ export default function Hero() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                     </span>
-                    <span className="text-sm font-semibold tracking-wide">מערכת ההפעלה החדשה שלכם</span>
+                    <span className="text-sm font-semibold tracking-wide">פלטפורמה All-in-One לאדריכלים ומעצבי פנים</span>
                 </motion.div>
 
                 {/* Headline */}
@@ -51,12 +57,27 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                    className="text-lg md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
+                    className="text-lg md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed"
                 >
-                    פלטפורמת All-in-One לאדריכלים ומעצבים.
+                    מניהול לידים ולקוחות, דרך פרויקטים ומשימות עם גאנט,
                     <br className="hidden md:block" />
-                    מניהול לידים וחוזים, דרך גאנט פרויקטים ועד למעקב רווחיות מדויק.
+                    ועד למעקב כספי מלא — הכל בפלטפורמה אחת בעברית.
                 </motion.p>
+
+                {/* Stats Row */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.5 }}
+                    className="flex justify-center gap-10 mb-12"
+                >
+                    {stats.map((s, i) => (
+                        <div key={i} className="text-center">
+                            <div className="text-3xl font-black text-foreground">{s.value}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
+                        </div>
+                    ))}
+                </motion.div>
 
                 {/* CTA Buttons */}
                 <motion.div
@@ -73,57 +94,41 @@ export default function Hero() {
                     </Link>
                     <Link href="#features">
                         <Button variant="ghost" size="lg" className="rounded-full px-8 h-14 text-lg font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                            איך זה עובד?
+                            גלו את הפיצ&#39;רים
                         </Button>
                     </Link>
                 </motion.div>
 
-                {/* Hero Image / Dashboard Preview */}
+                {/* Floating Feature Pills */}
                 <motion.div
-                    initial={{ opacity: 0, y: 100, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-                    className="mt-20 relative mx-auto max-w-6xl"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.9, ease: "easeOut" }}
+                    className="mt-20 flex flex-wrap justify-center gap-3 max-w-3xl mx-auto"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 h-full w-full pointer-events-none" />
-                    <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl overflow-hidden p-2 md:p-4 rotate-x-12 perspective-1000 transform-gpu">
-                        {/* Abstract UI representation */}
-                        <div className="w-full aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg flex items-center justify-center border border-border/30 relative">
-                            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.05]" />
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center space-y-4">
-                                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                                    <span className="text-4xl">🏗️</span>
-                                </div>
-                                <div className="text-muted-foreground text-sm font-medium">Dashboard Preview Placeholder</div>
-                            </div>
-
-                            {/* Floating UI Elements */}
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                                className="absolute top-[20%] left-[10%] bg-white p-4 rounded-xl shadow-lg border border-border/50 max-w-[200px]"
-                            >
-                                <div className="h-2 w-16 bg-green-500 rounded-full mb-2" />
-                                <div className="h-3 w-24 bg-gray-200 rounded mb-1" />
-                                <div className="h-2 w-12 bg-gray-100 rounded" />
-                            </motion.div>
-
-                            <motion.div
-                                animate={{ y: [0, 15, 0] }}
-                                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
-                                className="absolute bottom-[25%] right-[10%] bg-white p-4 rounded-xl shadow-lg border border-border/50 max-w-[200px]"
-                            >
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100" />
-                                    <div>
-                                        <div className="h-2 w-20 bg-gray-700/10 rounded mb-1" />
-                                        <div className="h-2 w-12 bg-gray-500/10 rounded" />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                        </div>
-                    </div>
+                    {[
+                        { icon: LayoutDashboard, label: 'דשבורד' },
+                        { icon: null, label: '🏗️ פרויקטים + גאנט' },
+                        { icon: null, label: '👥 CRM לקוחות' },
+                        { icon: null, label: '📋 ניהול לידים' },
+                        { icon: Clock, label: 'מעקב זמן' },
+                        { icon: null, label: '💰 כספים ורכש' },
+                        { icon: null, label: '📅 לוח שנה' },
+                        { icon: Share2, label: 'פורטל לקוח' },
+                        { icon: null, label: '🏢 ספקים' },
+                        { icon: Bot, label: 'סוכן AI' },
+                    ].map((pill, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 1 + i * 0.06 }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground shadow-sm"
+                        >
+                            {pill.icon ? <pill.icon className="w-3.5 h-3.5 text-primary" /> : null}
+                            {pill.label}
+                        </motion.div>
+                    ))}
                 </motion.div>
             </div>
         </section>

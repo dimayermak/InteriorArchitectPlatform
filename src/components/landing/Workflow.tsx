@@ -1,31 +1,31 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { UserPlus, FileSignature, Briefcase, TrendingUp } from 'lucide-react';
+import { UserPlus, Briefcase, CreditCard, Share2 } from 'lucide-react';
 
 const steps = [
     {
         icon: UserPlus,
-        title: 'קליטת ליד חדש',
-        description: 'הליד נכנס אוטומטית למערכת, מקבל שאלון אפיון ראשוני והופך לתיק לקוח פוטנציאלי.',
+        title: 'ליד נכנס — מנהלים אותו',
+        description: 'כל ליד חדש נרשם בפייפליין הלידים עם פרטי קשר, מקור ושלב. עוקבים אחרי ההתקדמות עד לסגירה והפיכה ללקוח.',
         gradient: 'from-blue-500 to-cyan-400',
     },
     {
-        icon: FileSignature,
-        title: 'הצעת מחיר וחוזה',
-        description: 'מחולל הצעות מחיר חכם מפיק מסמך מעוצב תוך דקות. חתימה דיגיטלית מהירה והפרויקט יוצא לדרך.',
+        icon: Briefcase,
+        title: 'פרויקט — שלבים ומשימות',
+        description: 'יוצרים פרויקט, מפרקים לשלבים (Phases) ומשימות, ומקצים לצוות. מעקב התקדמות ברור לכם ולסטודיו.',
         gradient: 'from-purple-500 to-pink-500',
     },
     {
-        icon: Briefcase,
-        title: 'ניהול הפרויקט',
-        description: 'גאנט משימות, רשימות רכש, סיכומי פגישות ותיעוד התקדמות - הכל במקום אחד שקוף לכם וללקוח.',
+        icon: CreditCard,
+        title: 'כספים — חשבוניות ורכש',
+        description: 'מנהלים חשבוניות ללקוחות, הזמנות רכש לספקים והוצאות — ורואים בדיוק מה הרווחתם בכל פרויקט.',
         gradient: 'from-orange-500 to-amber-500',
     },
     {
-        icon: TrendingUp,
-        title: 'גבייה ורווחיות',
-        description: 'מעקב תשלומים, דוחות שעות וניתוח רווחיות פרויקט בזמן אמת. תדעו בדיוק כמה הרווחתם.',
+        icon: Share2,
+        title: 'פורטל לקוח — שקיפות מלאה',
+        description: 'שולחים ללקוח קישור ייחודי שמציג לו את התקדמות הפרויקט, תקציב, גאנט ואירועים — בלי שצריך להתחבר.',
         gradient: 'from-green-500 to-emerald-400',
     },
 ];
@@ -41,7 +41,7 @@ export default function Workflow() {
                         viewport={{ once: true }}
                         className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6"
                     >
-                        תהליך עבודה מובנה
+                        תהליך עבודה אמיתי
                     </motion.div>
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
@@ -49,10 +49,10 @@ export default function Workflow() {
                         viewport={{ once: true }}
                         className="text-3xl md:text-5xl font-bold mb-6 text-foreground"
                     >
-                        מליד ועד מפתח
+                        מליד ועד פורטל לקוח
                     </motion.h2>
                     <p className="text-lg text-muted-foreground">
-                        המערכת מובילה אתכם יד ביד לאורך כל חיי הפרויקט, עם אוטומציות שחוסכות זמן יקר.
+                        הפלטפורמה מובילה אתכם לאורך כל מחזור החיים של הפרויקט — משלב הגיוס ועד לשקיפות מלאה עם הלקוח.
                     </p>
                 </div>
 
@@ -77,6 +77,9 @@ export default function Workflow() {
                                     <div className="relative z-10 shrink-0">
                                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg bg-gradient-to-br ${step.gradient}`}>
                                             <Icon size={32} />
+                                        </div>
+                                        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-background border-2 border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
+                                            {index + 1}
                                         </div>
                                     </div>
 
