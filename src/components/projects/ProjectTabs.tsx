@@ -9,6 +9,7 @@ import { ProjectOrders } from './ProjectOrders';
 import { ProjectSupervision } from './ProjectSupervision';
 import { ProjectFinance } from './ProjectFinance';
 import { ProjectGallery } from './ProjectGallery';
+import { ProjectClientReport } from './ProjectClientReport';
 
 interface ProjectTabsProps {
     project: Project & { client: { name: string } | null };
@@ -20,7 +21,7 @@ interface ProjectTabsProps {
 export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabsProps) {
     return (
         <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-6 lg:w-auto h-auto py-1">
+            <TabsList className="grid w-full grid-cols-7 lg:w-auto h-auto py-1">
                 <TabsTrigger value="overview">מבט על</TabsTrigger>
                 <TabsTrigger value="plan">תוכנית עבודה</TabsTrigger>
                 <TabsTrigger value="suppliers">ספקים</TabsTrigger>
@@ -28,6 +29,7 @@ export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabs
                 <TabsTrigger value="supervision">פיקוח</TabsTrigger>
                 <TabsTrigger value="finance">פיננסי</TabsTrigger>
                 <TabsTrigger value="gallery">גלריה וקבצים</TabsTrigger>
+                <TabsTrigger value="client-report">דוח לקוח</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -56,6 +58,10 @@ export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabs
 
             <TabsContent value="gallery">
                 <ProjectGallery projectId={project.id} />
+            </TabsContent>
+
+            <TabsContent value="client-report">
+                <ProjectClientReport projectId={project.id} />
             </TabsContent>
         </Tabs>
     );
