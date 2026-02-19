@@ -162,11 +162,11 @@ export function Sidebar() {
                                             href={board.path}
                                             className={cn(
                                                 "flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors",
-                                                pathname === board.path
-                                                    ? "bg-primary/10 text-primary font-medium"
+                                                (board.path === '/dashboard' ? pathname === board.path : pathname.startsWith(board.path))
+                                                    ? "bg-primary/10 text-primary font-semibold border-r-2 border-primary"
                                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                             )}
-                                            aria-current={pathname === board.path ? "page" : undefined}
+                                            aria-current={(board.path === '/dashboard' ? pathname === board.path : pathname.startsWith(board.path)) ? "page" : undefined}
                                         >
                                             <span className={cn("w-2 h-2 rounded-full shrink-0", board.color)} aria-hidden="true" />
                                             {board.name}

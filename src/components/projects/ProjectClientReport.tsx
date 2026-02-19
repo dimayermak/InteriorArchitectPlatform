@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Plus, Trash2, Save, Loader2, CheckCircle2 } from 'lucide-react';
 import { getClientReport, upsertClientReport } from '@/lib/api/client-reports';
 import type { UnexpectedEvent, DeliveryEstimate } from '@/lib/api/client-reports';
@@ -32,6 +32,151 @@ function newDelivery(): DeliveryEstimate {
         notes: '',
     };
 }
+
+// ─── Memoised row components ──────────────────────────────────────────────────
+// Extracting these prevents the parent re-render from remounting inputs,
+// which is what caused the cursor to jump on every keystroke.
+
+interface EventRowProps {
+    event: UnexpectedEvent;
+    onChange: (id: string, field: keyof UnexpectedEvent, value: string) => void;
+    onRemove: (id: string) => void;
+}
+
+const EventRow = memo(function EventRow({ event, onChange, onRemove }: EventRowProps) {
+    return (
+        <div className="border border-border rounded-xl p-4 space-y-3">
+            <div className="flex items-start gap-3">
+                <div className="flex-1 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">כותרת</label>
+                            <input
+                                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                defaultValue={event.title}
+                                onBlur={e => onChange(event.id, 'title', e.target.value)}
+                                onChange={e => onChange(event.id, 'title', e.target.value)}
+                                placeholder="למשל: עיכוב באספקת חומרים"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-muted-foreground">תאריך</label>
+                                <input
+                                    type="date"
+                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                    defaultValue={event.date}
+                                    onChange={e => onChange(event.id, 'date', e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-muted-foreground">סטטוס</label>
+                                <select
+                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                    defaultValue={event.status}
+                                    onChange={e => onChange(event.id, 'status', e.target.value)}
+                                >
+                                    <option value="in_progress">בטיפול</option>
+                                    <option value="handled">טופל</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">תיאור</label>
+                        <textarea
+                            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                            rows={2}
+                            defaultValue={event.description}
+                            onChange={e => onChange(event.id, 'description', e.target.value)}
+                            placeholder="מה קרה?"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">טיפול ופתרון</label>
+                        <textarea
+                            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                            rows={2}
+                            defaultValue={event.resolution}
+                            onChange={e => onChange(event.id, 'resolution', e.target.value)}
+                            placeholder="איך זה מטופל?"
+                        />
+                    </div>
+                </div>
+                <button
+                    onClick={() => onRemove(event.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors mt-1 flex-shrink-0"
+                    title="מחק אירוע"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    );
+});
+
+interface DeliveryRowProps {
+    delivery: DeliveryEstimate;
+    onChange: (id: string, field: keyof DeliveryEstimate, value: string) => void;
+    onRemove: (id: string) => void;
+}
+
+const DeliveryRow = memo(function DeliveryRow({ delivery, onChange, onRemove }: DeliveryRowProps) {
+    return (
+        <div className="border border-border rounded-xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+            <div className="md:col-span-2 space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">פריט / מוצר</label>
+                <input
+                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultValue={delivery.item}
+                    onChange={e => onChange(delivery.id, 'item', e.target.value)}
+                    placeholder="למשל: ספה מודולרית"
+                />
+            </div>
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">תאריך צפוי</label>
+                <input
+                    type="date"
+                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultValue={delivery.estimated_date}
+                    onChange={e => onChange(delivery.id, 'estimated_date', e.target.value)}
+                />
+            </div>
+            <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">סטטוס</label>
+                    <select
+                        className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        defaultValue={delivery.status}
+                        onChange={e => onChange(delivery.id, 'status', e.target.value)}
+                    >
+                        <option value="pending">ממתין</option>
+                        <option value="ordered">הוזמן</option>
+                        <option value="delivered">נמסר</option>
+                    </select>
+                </div>
+                <button
+                    onClick={() => onRemove(delivery.id)}
+                    className="h-9 w-9 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors rounded-md border border-border flex-shrink-0"
+                    title="מחק פריט"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
+            <div className="md:col-span-4 space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">הערה (אופציונלי)</label>
+                <input
+                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    defaultValue={delivery.notes}
+                    onChange={e => onChange(delivery.id, 'notes', e.target.value)}
+                    placeholder="פרטים נוספים..."
+                />
+            </div>
+        </div>
+    );
+});
+
+// ─── Main editor ──────────────────────────────────────────────────────────────
 
 export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: ProjectClientReportProps) {
     const [events, setEvents] = useState<UnexpectedEvent[]>([]);
@@ -74,13 +219,37 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
         }
     }
 
-    function updateEvent(id: string, field: keyof UnexpectedEvent, value: string) {
+    // Stable callbacks via useCallback so memoised rows don't re-render on each parent state change
+    const updateEvent = useCallback((id: string, field: keyof UnexpectedEvent, value: string) => {
         setEvents(prev => prev.map(e => e.id === id ? { ...e, [field]: value } : e));
-    }
+    }, []);
 
-    function updateDelivery(id: string, field: keyof DeliveryEstimate, value: string) {
+    const removeEvent = useCallback((id: string) => {
+        setEvents(prev => prev.filter(e => e.id !== id));
+    }, []);
+
+    const updateDelivery = useCallback((id: string, field: keyof DeliveryEstimate, value: string) => {
         setDeliveries(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
-    }
+    }, []);
+
+    const removeDelivery = useCallback((id: string) => {
+        setDeliveries(prev => prev.filter(d => d.id !== id));
+    }, []);
+
+    const SaveBtn = ({ full }: { full?: boolean }) => (
+        <button
+            onClick={handleSave}
+            disabled={saving}
+            className={`flex items-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 ${full ? 'px-6 py-2.5' : 'px-4 py-2'}`}
+        >
+            {saving
+                ? <><Loader2 className="w-4 h-4 animate-spin" />שומר...</>
+                : saved
+                    ? <><CheckCircle2 className="w-4 h-4 text-green-300" />נשמר!</>
+                    : <><Save className="w-4 h-4" />שמור דוח</>
+            }
+        </button>
+    );
 
     if (loading) return (
         <div className="flex items-center justify-center py-16 text-muted-foreground">
@@ -91,24 +260,13 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
 
     return (
         <div className="space-y-8">
-            {/* Save button */}
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold">דוח לקוח</h2>
                     <p className="text-sm text-muted-foreground">המידע שמוצג ללקוח בפורטל האישי שלו</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
-                >
-                    {saving
-                        ? <><Loader2 className="w-4 h-4 animate-spin" />שומר...</>
-                        : saved
-                            ? <><CheckCircle2 className="w-4 h-4 text-green-300" />נשמר!</>
-                            : <><Save className="w-4 h-4" />שמור דוח</>
-                    }
-                </button>
+                <SaveBtn />
             </div>
 
             {/* Unexpected Events */}
@@ -129,71 +287,12 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
                         </p>
                     )}
                     {events.map(ev => (
-                        <div key={ev.id} className="border border-border rounded-xl p-4 space-y-3">
-                            <div className="flex items-start gap-3">
-                                <div className="flex-1 space-y-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div className="space-y-1">
-                                            <label className="text-xs font-medium text-muted-foreground">כותרת</label>
-                                            <input
-                                                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                                value={ev.title}
-                                                onChange={e => updateEvent(ev.id, 'title', e.target.value)}
-                                                placeholder="למשל: עיכוב באספקת חומרים"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-medium text-muted-foreground">תאריך</label>
-                                                <input
-                                                    type="date"
-                                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                                    value={ev.date}
-                                                    onChange={e => updateEvent(ev.id, 'date', e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-medium text-muted-foreground">סטטוס</label>
-                                                <select
-                                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                                    value={ev.status}
-                                                    onChange={e => updateEvent(ev.id, 'status', e.target.value as 'handled' | 'in_progress')}
-                                                >
-                                                    <option value="in_progress">בטיפול</option>
-                                                    <option value="handled">טופל</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">תיאור</label>
-                                        <textarea
-                                            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                                            rows={2}
-                                            value={ev.description}
-                                            onChange={e => updateEvent(ev.id, 'description', e.target.value)}
-                                            placeholder="מה קרה?"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">טיפול ופתרון</label>
-                                        <textarea
-                                            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                                            rows={2}
-                                            value={ev.resolution}
-                                            onChange={e => updateEvent(ev.id, 'resolution', e.target.value)}
-                                            placeholder="איך זה מטופל?"
-                                        />
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setEvents(prev => prev.filter(e => e.id !== ev.id))}
-                                    className="text-muted-foreground hover:text-destructive transition-colors mt-1"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <EventRow
+                            key={ev.id}
+                            event={ev}
+                            onChange={updateEvent}
+                            onRemove={removeEvent}
+                        />
                     ))}
                 </div>
             </section>
@@ -216,55 +315,12 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
                         </p>
                     )}
                     {deliveries.map(d => (
-                        <div key={d.id} className="border border-border rounded-xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                            <div className="md:col-span-2 space-y-1">
-                                <label className="text-xs font-medium text-muted-foreground">פריט / מוצר</label>
-                                <input
-                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={d.item}
-                                    onChange={e => updateDelivery(d.id, 'item', e.target.value)}
-                                    placeholder="למשל: ספה מודולרית"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-medium text-muted-foreground">תאריך צפוי</label>
-                                <input
-                                    type="date"
-                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={d.estimated_date}
-                                    onChange={e => updateDelivery(d.id, 'estimated_date', e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-2 items-end">
-                                <div className="flex-1 space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">סטטוס</label>
-                                    <select
-                                        className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                        value={d.status}
-                                        onChange={e => updateDelivery(d.id, 'status', e.target.value as DeliveryEstimate['status'])}
-                                    >
-                                        <option value="pending">ממתין</option>
-                                        <option value="ordered">הוזמן</option>
-                                        <option value="delivered">נמסר</option>
-                                    </select>
-                                </div>
-                                <button
-                                    onClick={() => setDeliveries(prev => prev.filter(x => x.id !== d.id))}
-                                    className="h-9 w-9 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors rounded-md border border-border flex-shrink-0"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                            <div className="md:col-span-4 space-y-1">
-                                <label className="text-xs font-medium text-muted-foreground">הערה (אופציונלי)</label>
-                                <input
-                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={d.notes}
-                                    onChange={e => updateDelivery(d.id, 'notes', e.target.value)}
-                                    placeholder="פרטים נוספים..."
-                                />
-                            </div>
-                        </div>
+                        <DeliveryRow
+                            key={d.id}
+                            delivery={d}
+                            onChange={updateDelivery}
+                            onRemove={removeDelivery}
+                        />
                     ))}
                 </div>
             </section>
@@ -283,18 +339,7 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
 
             {/* Bottom save */}
             <div className="flex justify-end pt-2">
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
-                >
-                    {saving
-                        ? <><Loader2 className="w-4 h-4 animate-spin" />שומר...</>
-                        : saved
-                            ? <><CheckCircle2 className="w-4 h-4" />נשמר!</>
-                            : <><Save className="w-4 h-4" />שמור דוח</>
-                    }
-                </button>
+                <SaveBtn full />
             </div>
         </div>
     );
