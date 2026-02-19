@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, memo } from 'react';
-import { Plus, Trash2, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Save, Loader2, CheckCircle2, Share2, Copy, Check, ExternalLink } from 'lucide-react';
 import { getClientReport, upsertClientReport } from '@/lib/api/client-reports';
 import type { UnexpectedEvent, DeliveryEstimate } from '@/lib/api/client-reports';
 
@@ -186,6 +186,11 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
 
+    // Portal share state
+    const [portalLink, setPortalLink] = useState<string | null>(null);
+    const [generating, setGenerating] = useState(false);
+    const [copied, setCopied] = useState(false);
+
     const loadReport = useCallback(async () => {
         try {
             const report = await getClientReport(projectId);
@@ -199,7 +204,42 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
         }
     }, [projectId]);
 
-    useEffect(() => { loadReport(); }, [loadReport]);
+    // Load existing portal link on mount
+    const loadPortalLink = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/portal/generate-token?projectId=${projectId}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.link) setPortalLink(data.link);
+            }
+        } catch { /* no link yet */ }
+    }, [projectId]);
+
+    useEffect(() => { loadReport(); loadPortalLink(); }, [loadReport, loadPortalLink]);
+
+    async function handleGenerateLink() {
+        setGenerating(true);
+        try {
+            const res = await fetch('/api/portal/generate-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projectId }),
+            });
+            const data = await res.json();
+            if (data.link) setPortalLink(data.link);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setGenerating(false);
+        }
+    }
+
+    async function handleCopy() {
+        if (!portalLink) return;
+        await navigator.clipboard.writeText(portalLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+    }
 
     async function handleSave() {
         setSaving(true);
@@ -261,12 +301,50 @@ export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: 
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold">דוח לקוח</h2>
-                    <p className="text-sm text-muted-foreground">המידע שמוצג ללקוח בפורטל האישי שלו</p>
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold">דוח לקוח</h2>
+                        <p className="text-sm text-muted-foreground">המידע שמוצג ללקוח בפורטל האישי שלו</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleGenerateLink}
+                            disabled={generating}
+                            className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 text-primary text-sm font-medium px-4 py-2 hover:bg-primary/10 transition-colors disabled:opacity-60"
+                        >
+                            {generating
+                                ? <><Loader2 className="w-4 h-4 animate-spin" />יוצר קישור...</>
+                                : <><Share2 className="w-4 h-4" />{portalLink ? 'חדש קישור' : 'שתף ללקוח'}</>
+                            }
+                        </button>
+                        <SaveBtn />
+                    </div>
                 </div>
-                <SaveBtn />
+
+                {/* Portal link banner */}
+                {portalLink && (
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <ExternalLink className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <span className="text-sm text-emerald-800 truncate flex-1 dir-ltr text-left font-mono">{portalLink}</span>
+                        <button
+                            onClick={handleCopy}
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex-shrink-0"
+                        >
+                            {copied
+                                ? <><Check className="w-3.5 h-3.5" />הועתק!</>
+                                : <><Copy className="w-3.5 h-3.5" />העתק</>}
+                        </button>
+                        <a
+                            href={portalLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors flex-shrink-0"
+                        >
+                            פתח
+                        </a>
+                    </div>
+                )}
             </div>
 
             {/* Unexpected Events */}
