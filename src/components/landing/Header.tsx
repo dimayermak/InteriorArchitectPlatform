@@ -51,7 +51,7 @@ export default function Header() {
                 </Link>
                 <Link href="/register">
                     <Button size="sm" className={cn("rounded-full font-bold transition-all duration-200", scrolled ? "shadow-md" : "shadow-lg shadow-primary/20")}>
-                        ניסיון חינם
+                        הרשמה
                     </Button>
                 </Link>
             </div>
