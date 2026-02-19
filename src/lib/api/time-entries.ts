@@ -1,8 +1,26 @@
 import { createClient } from '@/lib/supabase/client';
-import type { TimeEntry } from '@/types/database';
 
-type TimeEntryInsert = Pick<TimeEntry, 'organization_id' | 'user_id' | 'duration_minutes' | 'date'> & Partial<Omit<TimeEntry, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'user_id' | 'duration_minutes' | 'date'>>;
-type TimeEntryUpdate = Partial<Omit<TimeEntry, 'id'>>;
+// DB columns: id, organization_id, project_id, task_id, user_id,
+//             description, hours (numeric), date, billable, client_id,
+//             created_at, updated_at
+
+export interface TimeEntryRow {
+    id: string;
+    organization_id: string;
+    project_id: string | null;
+    task_id: string | null;
+    user_id: string;
+    client_id: string | null;
+    description: string | null;
+    hours: number;
+    date: string;
+    billable: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+type TimeEntryInsert = Pick<TimeEntryRow, 'organization_id' | 'user_id' | 'hours' | 'date'> &
+    Partial<Omit<TimeEntryRow, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'user_id' | 'hours' | 'date'>>;
 
 export async function getTimeEntries(
     organizationId: string,
@@ -13,127 +31,44 @@ export async function getTimeEntries(
         startDate?: string;
         endDate?: string;
     }
-): Promise<TimeEntry[]> {
+): Promise<TimeEntryRow[]> {
     const supabase = createClient();
 
     let query = supabase
         .from('time_entries')
         .select('*')
         .eq('organization_id', organizationId)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false });
 
-    if (options?.projectId) {
-        query = query.eq('project_id', options.projectId);
-    }
-    if (options?.clientId) {
-        query = query.eq('client_id', options.clientId);
-    }
-    if (options?.userId) {
-        query = query.eq('user_id', options.userId);
-    }
-    if (options?.startDate) {
-        query = query.gte('date', options.startDate);
-    }
-    if (options?.endDate) {
-        query = query.lte('date', options.endDate);
-    }
+    if (options?.projectId) query = query.eq('project_id', options.projectId);
+    if (options?.clientId) query = query.eq('client_id', options.clientId);
+    if (options?.userId) query = query.eq('user_id', options.userId);
+    if (options?.startDate) query = query.gte('date', options.startDate);
+    if (options?.endDate) query = query.lte('date', options.endDate);
 
     const { data, error } = await query;
     if (error) throw new Error(error.message);
-    return data || [];
+    return (data || []) as TimeEntryRow[];
 }
 
-export async function getActiveTimer(organizationId: string, userId: string): Promise<TimeEntry | null> {
-    const supabase = createClient();
-
-    const { data, error } = await supabase
-        .from('time_entries')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('user_id', userId)
-        .eq('is_running', true)
-        .single();
-
-    if (error) {
-        if (error.code === 'PGRST116') return null;
-        throw new Error(error.message);
-    }
-    return data;
-}
-
-export async function startTimer(entry: TimeEntryInsert): Promise<TimeEntry> {
+export async function createTimeEntry(entry: TimeEntryInsert): Promise<TimeEntryRow> {
     const supabase = createClient();
 
     const { data, error } = await supabase
         .from('time_entries')
         .insert({
             ...entry,
-            is_running: true,
-            started_at: new Date().toISOString(),
-            duration_minutes: 0,
-            date: new Date().toISOString().split('T')[0],
-            is_billable: entry.is_billable ?? true,
-            metadata: entry.metadata || {},
+            billable: entry.billable ?? true,
         })
         .select()
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as TimeEntryRow;
 }
 
-export async function stopTimer(id: string): Promise<TimeEntry> {
-    const supabase = createClient();
-
-    // First get the running entry
-    const { data: entry, error: fetchError } = await supabase
-        .from('time_entries')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-    if (fetchError) throw new Error(fetchError.message);
-    if (!entry.started_at) throw new Error('Timer was not started');
-
-    const startedAt = new Date(entry.started_at);
-    const endedAt = new Date();
-    const durationMinutes = Math.round((endedAt.getTime() - startedAt.getTime()) / 60000);
-
-    const { data, error } = await supabase
-        .from('time_entries')
-        .update({
-            is_running: false,
-            ended_at: endedAt.toISOString(),
-            duration_minutes: durationMinutes,
-            updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-    if (error) throw new Error(error.message);
-    return data;
-}
-
-export async function createManualEntry(entry: TimeEntryInsert): Promise<TimeEntry> {
-    const supabase = createClient();
-
-    const { data, error } = await supabase
-        .from('time_entries')
-        .insert({
-            ...entry,
-            is_running: false,
-            is_billable: entry.is_billable ?? true,
-            metadata: entry.metadata || {},
-        })
-        .select()
-        .single();
-
-    if (error) throw new Error(error.message);
-    return data;
-}
-
-export async function updateTimeEntry(id: string, updates: TimeEntryUpdate): Promise<TimeEntry> {
+export async function updateTimeEntry(id: string, updates: Partial<TimeEntryRow>): Promise<TimeEntryRow> {
     const supabase = createClient();
 
     const { data, error } = await supabase
@@ -144,70 +79,22 @@ export async function updateTimeEntry(id: string, updates: TimeEntryUpdate): Pro
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return data as TimeEntryRow;
 }
 
 export async function deleteTimeEntry(id: string): Promise<void> {
     const supabase = createClient();
-
-    const { error } = await supabase
-        .from('time_entries')
-        .delete()
-        .eq('id', id);
-
+    const { error } = await supabase.from('time_entries').delete().eq('id', id);
     if (error) throw new Error(error.message);
 }
 
-export async function getWeeklyTimesheet(
-    organizationId: string,
-    userId: string,
-    weekStart: string
-): Promise<{ date: string; totalMinutes: number; entries: TimeEntry[] }[]> {
-    const supabase = createClient();
-
-    const startDate = new Date(weekStart);
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6);
-
-    const { data, error } = await supabase
-        .from('time_entries')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('user_id', userId)
-        .gte('date', weekStart)
-        .lte('date', endDate.toISOString().split('T')[0])
-        .order('date', { ascending: true });
-
-    if (error) throw new Error(error.message);
-
-    // Group by date
-    const grouped: Record<string, { totalMinutes: number; entries: TimeEntry[] }> = {};
-
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        grouped[dateStr] = { totalMinutes: 0, entries: [] };
-    }
-
-    (data || []).forEach((entry) => {
-        if (grouped[entry.date]) {
-            grouped[entry.date].entries.push(entry);
-            grouped[entry.date].totalMinutes += entry.duration_minutes;
-        }
-    });
-
-    return Object.entries(grouped).map(([date, data]) => ({
-        date,
-        ...data,
-    }));
+export interface TimeStats {
+    todayHours: number;
+    weekHours: number;
+    monthHours: number;
 }
 
-export async function getTimeStats(organizationId: string, userId: string): Promise<{
-    todayMinutes: number;
-    weekMinutes: number;
-    monthMinutes: number;
-}> {
+export async function getTimeStats(organizationId: string, userId: string): Promise<TimeStats> {
     const supabase = createClient();
     const today = new Date().toISOString().split('T')[0];
 
@@ -221,18 +108,17 @@ export async function getTimeStats(organizationId: string, userId: string): Prom
 
     const { data, error } = await supabase
         .from('time_entries')
-        .select('date, duration_minutes')
+        .select('date, hours')
         .eq('organization_id', organizationId)
         .eq('user_id', userId)
         .gte('date', monthStartStr);
 
     if (error) throw new Error(error.message);
-
-    const entries = data || [];
+    const entries = (data || []) as { date: string; hours: number }[];
 
     return {
-        todayMinutes: entries.filter((e) => e.date === today).reduce((sum, e) => sum + e.duration_minutes, 0),
-        weekMinutes: entries.filter((e) => e.date >= weekStartStr).reduce((sum, e) => sum + e.duration_minutes, 0),
-        monthMinutes: entries.reduce((sum, e) => sum + e.duration_minutes, 0),
+        todayHours: entries.filter(e => e.date === today).reduce((s, e) => s + (e.hours || 0), 0),
+        weekHours: entries.filter(e => e.date >= weekStartStr).reduce((s, e) => s + (e.hours || 0), 0),
+        monthHours: entries.reduce((s, e) => s + (e.hours || 0), 0),
     };
 }

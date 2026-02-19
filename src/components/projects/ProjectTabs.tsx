@@ -10,15 +10,18 @@ import { ProjectSupervision } from './ProjectSupervision';
 import { ProjectFinance } from './ProjectFinance';
 import { ProjectGallery } from './ProjectGallery';
 import { ProjectClientReport } from './ProjectClientReport';
+import { ProjectFiles } from './ProjectFiles';
 
 interface ProjectTabsProps {
     project: Project & { client: { name: string } | null };
     stats: any;
     tasks: Task[];
     statusLabels: Record<string, { label: string; color: string }>;
+    organizationId: string;
+    userId: string;
 }
 
-export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabsProps) {
+export function ProjectTabs({ project, stats, tasks, statusLabels, organizationId, userId }: ProjectTabsProps) {
     return (
         <Tabs defaultValue="overview" className="space-y-4">
             <TabsList className="grid w-full grid-cols-7 lg:w-auto h-auto py-1">
@@ -56,8 +59,15 @@ export function ProjectTabs({ project, stats, tasks, statusLabels }: ProjectTabs
                 <ProjectFinance projectId={project.id} budget={project.budget || 0} />
             </TabsContent>
 
-            <TabsContent value="gallery">
+            <TabsContent value="gallery" className="space-y-8">
                 <ProjectGallery projectId={project.id} />
+                <div className="border-t border-border pt-6">
+                    <ProjectFiles
+                        projectId={project.id}
+                        organizationId={organizationId}
+                        userId={userId}
+                    />
+                </div>
             </TabsContent>
 
             <TabsContent value="client-report">

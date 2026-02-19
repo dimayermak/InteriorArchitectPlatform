@@ -54,11 +54,17 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
     const [actions, setActions] = useState<AgentAction[]>([]);
     const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'feed' | 'briefing'>('feed');
+    const [activeTab, setActiveTab] = useState<'feed' | 'briefing' | 'command'>('feed');
     const [loadingBriefing, setLoadingBriefing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [executingId, setExecutingId] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    // Command chat state
+    const [commandInput, setCommandInput] = useState('');
+    const [commandLoading, setCommandLoading] = useState(false);
+    interface ChatMessage { role: 'user' | 'ai'; text: string; success?: boolean; }
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
     const fetchActions = useCallback(async () => {
         setIsLoading(true);
@@ -116,6 +122,31 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
             setError(msg);
             console.error('Failed to dismiss action:', err);
             setTimeout(() => setError(null), 5000);
+        }
+    };
+
+    const handleSendCommand = async () => {
+        const msg = commandInput.trim();
+        if (!msg || commandLoading) return;
+        setCommandInput('');
+        setChatMessages(prev => [...prev, { role: 'user', text: msg }]);
+        setCommandLoading(true);
+        try {
+            const res = await fetch('/api/ai/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, organizationId, userId }),
+            });
+            const data = await res.json();
+            setChatMessages(prev => [...prev, {
+                role: 'ai',
+                text: data.message_he || data.summary_he || 'בוצע בהצלחה',
+                success: data.success,
+            }]);
+        } catch {
+            setChatMessages(prev => [...prev, { role: 'ai', text: '❌ שגיאה בתקשורת', success: false }]);
+        } finally {
+            setCommandLoading(false);
         }
     };
 
@@ -206,7 +237,8 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
             }}>
                 {[
                     { key: 'feed' as const, label: 'פעילות', icon: '📊' },
-                    { key: 'briefing' as const, label: 'תדרוך יומי', icon: '🌅' },
+                    { key: 'briefing' as const, label: 'תדרוך', icon: '🌅' },
+                    { key: 'command' as const, label: 'פקודה', icon: '💬' },
                 ].map(tab => (
                     <button
                         key={tab.key}
@@ -416,6 +448,30 @@ export default function AgentActivityFeed({ organizationId, userId, isOpen, onCl
                                 </button>
                             </div>
                         )}
+                    </div>
+                )}
+                {/* Command Tab */}
+                {activeTab === 'command' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {chatMessages.length === 0 && (
+                            <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                                <div style={{ fontSize: '40px', marginBottom: '12px' }}>💬</div>
+                                <h3 style={{ color: '#f5f5f5', fontSize: '15px', fontWeight: 600, margin: '0 0 8px 0' }}>פקודה בשפה חופשית</h3>
+                                <p style={{ color: '#888', fontSize: '12px', margin: 0, lineHeight: 1.6 }}>כתוב פקודה בעברית והסוכן יבצע אותה</p>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
+                            {chatMessages.map((m, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-start' : 'flex-end' }}>
+                                    <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: m.role === 'user' ? 'rgba(255,255,255,0.07)' : m.success === false ? 'rgba(239,68,68,0.12)' : 'rgba(167,139,250,0.15)', border: m.role === 'user' ? '1px solid rgba(255,255,255,0.1)' : m.success === false ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(167,139,250,0.2)', color: m.role === 'user' ? '#e5e5e5' : '#d4bbfc', fontSize: '13px', lineHeight: 1.5 }}>{m.text}</div>
+                                </div>
+                            ))}
+                            {commandLoading && <div style={{ display: 'flex', justifyContent: 'flex-end' }}><div style={{ padding: '10px 18px', borderRadius: '14px 14px 14px 4px', background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: '18px', letterSpacing: '4px' }}>...</div></div>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
+                            <textarea value={commandInput} onChange={e => setCommandInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendCommand(); } }} placeholder="כתוב פקודה... (Enter לשליחה)" rows={2} style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', color: '#f5f5f5', fontSize: '13px', padding: '10px 14px', resize: 'none', outline: 'none', fontFamily: 'inherit', direction: 'rtl' }} />
+                            <button onClick={handleSendCommand} disabled={commandLoading || !commandInput.trim()} style={{ width: '44px', height: '44px', borderRadius: '10px', background: (commandLoading || !commandInput.trim()) ? 'rgba(167,139,250,0.2)' : 'linear-gradient(135deg, #a78bfa, #7c3aed)', border: 'none', color: 'white', fontSize: '18px', cursor: (commandLoading || !commandInput.trim()) ? 'not-allowed' : 'pointer', flexShrink: 0, alignSelf: 'flex-end' }}>➤</button>
+                        </div>
                     </div>
                 )}
             </div>

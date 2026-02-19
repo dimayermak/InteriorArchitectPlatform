@@ -9,6 +9,7 @@ import { getTasks } from '@/lib/api/tasks';
 import type { Project, ProjectPhase, Task } from '@/types/database';
 import { ArrowRight, User } from 'lucide-react';
 import { ProjectTabs } from '@/components/projects/ProjectTabs';
+import { createClient } from '@/lib/supabase/client';
 
 const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
 
@@ -29,10 +30,15 @@ export default function ProjectDetailPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [stats, setStats] = useState<{ tasksTotal: number; tasksCompleted: number; hoursLogged: number; budget: number; spent: number } | null>(null);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState('');
 
     useEffect(() => {
         async function load() {
             try {
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) setUserId(user.id);
+
                 const [projectData, tasksData, statsData] = await Promise.all([
                     getProjectWithDetails(projectId),
                     getTasks(DEV_ORG_ID, projectId),
@@ -118,6 +124,8 @@ export default function ProjectDetailPage() {
                 stats={stats}
                 tasks={tasks}
                 statusLabels={statusLabels}
+                organizationId={DEV_ORG_ID}
+                userId={userId}
             />
         </div>
     );
