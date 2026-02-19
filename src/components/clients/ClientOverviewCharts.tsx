@@ -2,11 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
-import type { Project, TimeEntry } from '@/types/database';
+import type { Project } from '@/types/database';
+import type { TimeEntryRow } from '@/lib/api/time-entries';
 
 interface ClientOverviewChartsProps {
     projects: Project[];
-    timeEntries: TimeEntry[];
+    timeEntries: TimeEntryRow[];
 }
 
 export function ClientOverviewCharts({ projects, timeEntries }: ClientOverviewChartsProps) {
@@ -44,7 +45,7 @@ export function ClientOverviewCharts({ projects, timeEntries }: ClientOverviewCh
             if (p) name = p.name;
         }
 
-        const hours = (entry.duration_minutes || 0) / 60;
+        const hours = entry.hours || 0;
         acc[name] = (acc[name] || 0) + hours;
         return acc;
     }, {} as Record<string, number>);

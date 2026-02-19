@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Badge, EmptyState } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/Card';
-import type { Client, Project, TimeEntry } from '@/types/database';
+import type { Client, Project } from '@/types/database';
 import { updateClient, deleteClient } from '@/lib/api/clients';
-import { getTimeEntries } from '@/lib/api/time-entries';
+import { getTimeEntries, type TimeEntryRow } from '@/lib/api/time-entries';
 import { ClientOverviewCharts } from '@/components/clients/ClientOverviewCharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 
@@ -16,7 +16,7 @@ interface ClientDetailClientProps {
 
 export function ClientDetailClient({ client: initialClient }: ClientDetailClientProps) {
     const [client, setClient] = useState(initialClient);
-    const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+    const [timeEntries, setTimeEntries] = useState<TimeEntryRow[]>([]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -130,7 +130,7 @@ export function ClientDetailClient({ client: initialClient }: ClientDetailClient
                                 <div>
                                     <p className="text-sm text-gray-500 font-medium">סך שעות עבודה</p>
                                     <h3 className="text-2xl font-bold mt-1">
-                                        {(timeEntries.reduce((acc, curr) => acc + curr.duration_minutes, 0) / 60).toFixed(1)}
+                                        {timeEntries.reduce((acc, curr) => acc + (curr.hours || 0), 0).toFixed(1)}
                                     </h3>
                                 </div>
                                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
