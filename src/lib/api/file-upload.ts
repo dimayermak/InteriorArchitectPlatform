@@ -92,3 +92,11 @@ export async function deleteProjectFile(file: ProjectFile): Promise<void> {
     const { error } = await supabase.from('project_files').delete().eq('id', file.id);
     if (error) throw new Error(error.message);
 }
+export async function renameProjectFile(id: string, newName: string): Promise<void> {
+    const supabase = createClient();
+    const { error } = await supabase
+        .from('project_files')
+        .update({ name: newName })
+        .eq('id', id);
+    if (error) throw new Error(error.message);
+}

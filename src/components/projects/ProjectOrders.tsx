@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
-import { Plus, Trash2, ShoppingCart, Truck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, Truck, CheckCircle2, AlertCircle, Download } from 'lucide-react';
+import { exportToExcel } from '@/lib/utils/excel-export';
 import { getPurchaseOrders, createPurchaseOrder, deletePurchaseOrder, updatePurchaseOrder } from '@/lib/api/orders';
 import { getProjectSuppliers } from '@/lib/api/suppliers';
 import type { PurchaseOrder, Supplier, InvoiceItem } from '@/types/database';
@@ -133,10 +134,31 @@ export function ProjectOrders({ projectId }: ProjectOrdersProps) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>הזמנות רכש</CardTitle>
-                    <Button onClick={() => setIsAddModalOpen(true)} size="sm">
-                        <Plus className="w-4 h-4 ml-1" />
-                        הזמנה חדשה
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportToExcel(
+                                orders,
+                                [
+                                    { header: 'ספק', key: (row) => getSupplierName(row.supplier_id) },
+                                    { header: 'תאריך', key: (row) => new Date(row.order_date).toLocaleDateString('he-IL') },
+                                    { header: 'סטטוס', key: (row) => statusConfig[row.status]?.label || row.status },
+                                    { header: 'פריטים', key: (row) => row.items?.length ?? 0 },
+                                    { header: 'סה"כ', key: 'total_amount' },
+                                    { header: 'הערות', key: 'notes' },
+                                ],
+                                'הזמנות-רכש'
+                            )}
+                        >
+                            <Download className="w-4 h-4 ml-1" />
+                            ייצוא
+                        </Button>
+                        <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+                            <Plus className="w-4 h-4 ml-1" />
+                            הזמנה חדשה
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
