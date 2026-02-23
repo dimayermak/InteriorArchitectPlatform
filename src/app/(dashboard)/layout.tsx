@@ -1,4 +1,7 @@
+'use client';
+
 import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNav } from "@/components/layout/TopNav";
 
 export default function DashboardLayout({
     children,
@@ -11,11 +14,12 @@ export default function DashboardLayout({
             <Sidebar />
 
             {/* Main Content Area */}
-            {/* Sidebar width = 16 (64px) global + 64 (256px) workspace = 320px total */}
-            {/* Margin Right instead of Left for RTL */}
-            <div className="flex flex-1 flex-col mr-[320px] transition-all duration-300 w-[calc(100vw-320px)]">
-                {/* Apps allow scrolling of the main area independently */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white/50">
+            <div className="flex flex-1 flex-col mr-[300px] transition-all duration-300 w-[calc(100vw-300px)]">
+                {/* Top Navigation */}
+                <TopNav />
+
+                {/* Page Content */}
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc]">
                     {children}
                 </main>
             </div>

@@ -5,12 +5,30 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { getDashboardStats, getRecentActivity, getUpcomingTasks, getProjectStats, getClientGrowth, getRevenueStats, type DashboardStats, type RecentActivity } from '@/lib/api/dashboard';
-import { Users, FolderOpen, TrendingUp, Clock, Plus, ArrowLeft, Calendar, AlertCircle } from 'lucide-react';
+import {
+    Users, FolderOpen, TrendingUp, Clock, Plus, Calendar, Target,
+    CheckSquare, Wallet, ArrowUpLeft, Sparkles, Sun, Sunset, Moon, FolderKanban
+} from 'lucide-react';
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts';
 
 interface DashboardClientProps {
     organizationId: string;
 }
+
+function getGreeting(): { text: string; icon: React.ReactNode } {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: 'בוקר טוב', icon: <Sun className="w-6 h-6 text-amber-400" /> };
+    if (hour < 17) return { text: 'צהריים טובים', icon: <Sun className="w-6 h-6 text-orange-400" /> };
+    if (hour < 21) return { text: 'ערב טוב', icon: <Sunset className="w-6 h-6 text-purple-400" /> };
+    return { text: 'לילה טוב', icon: <Moon className="w-6 h-6 text-indigo-400" /> };
+}
+
+const quickActions = [
+    { label: 'פרויקט חדש', icon: <FolderKanban className="w-5 h-5" />, href: '/projects/new', color: 'text-emerald-600', bg: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200/50' },
+    { label: 'ליד חדש', icon: <Target className="w-5 h-5" />, href: '/leads/new', color: 'text-purple-600', bg: 'bg-purple-50 hover:bg-purple-100 border-purple-200/50' },
+    { label: 'משימה חדשה', icon: <CheckSquare className="w-5 h-5" />, href: '/tasks/new', color: 'text-blue-600', bg: 'bg-blue-50 hover:bg-blue-100 border-blue-200/50' },
+    { label: 'הוצאה חדשה', icon: <Wallet className="w-5 h-5" />, href: '/finance', color: 'text-amber-600', bg: 'bg-amber-50 hover:bg-amber-100 border-amber-200/50' },
+];
 
 export function DashboardClient({ organizationId }: DashboardClientProps) {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -20,6 +38,8 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
     const [clientGrowth, setClientGrowth] = useState<{ date: string; count: number }[]>([]);
     const [revenueStats, setRevenueStats] = useState<{ name: string; income: number; expenses: number }[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const greeting = getGreeting();
 
     useEffect(() => {
         async function loadDashboard() {
@@ -50,8 +70,18 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="p-6 space-y-6 max-w-[1600px] mx-auto animate-fade-in">
+                {/* Skeleton loading */}
+                <div className="h-20 bg-muted/50 rounded-2xl animate-pulse" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-32 bg-muted/50 rounded-2xl animate-pulse" />
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 h-80 bg-muted/50 rounded-2xl animate-pulse" />
+                    <div className="h-80 bg-muted/50 rounded-2xl animate-pulse" />
+                </div>
             </div>
         );
     }
@@ -59,38 +89,48 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
     if (!stats) return null;
 
     return (
-        <div className="p-6 space-y-8 max-w-[1600px] mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                        סקירה כללית
-                    </h1>
-                    <p className="text-muted-foreground mt-1">ברוכים הבאים למערכת הניהול</p>
-                </div>
-                <div className="flex gap-3">
-                    <Link href="/projects/new">
-                        <Button className="gap-2 shadow-sm">
-                            <Plus className="w-4 h-4" />
-                            פרויקט חדש
-                        </Button>
-                    </Link>
+        <div className="p-6 space-y-8 max-w-[1600px] mx-auto animate-fade-in">
+            {/* Greeting Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-100 to-fuchsia-100 flex items-center justify-center">
+                        {greeting.icon}
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">{greeting.text} 👋</h1>
+                        <p className="text-muted-foreground text-sm mt-0.5">הנה סקירה של מה שקורה היום בעסק</p>
+                    </div>
                 </div>
             </div>
 
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {quickActions.map(action => (
+                    <Link key={action.href} href={action.href}>
+                        <div className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${action.bg}`}>
+                            <span className={action.color}>{action.icon}</span>
+                            <span className="text-sm font-medium text-foreground/80">{action.label}</span>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <Link href="/projects">
-                    <Card className="hover:shadow-lg transition-shadow duration-200 border-primary/10 bg-gradient-to-br from-background to-primary/5 cursor-pointer h-full">
-                        <CardContent className="p-6">
+                    <Card className="hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 border-transparent bg-white cursor-pointer h-full group overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] to-transparent" />
+                        <CardContent className="p-5 relative">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">פרויקטים פעילים</p>
-                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.projects.active}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">מתוך {stats.projects.total} סה״כ</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums text-foreground">{stats.projects.active}</h3>
+                                    <p className="text-xs text-muted-foreground/70 mt-1 flex items-center gap-1">
+                                        מתוך {stats.projects.total} סה״כ
+                                    </p>
                                 </div>
-                                <div className="p-3 bg-primary/10 rounded-xl">
-                                    <FolderOpen className="w-5 h-5 text-primary" />
+                                <div className="p-2.5 bg-violet-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <FolderOpen className="w-5 h-5 text-violet-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -98,16 +138,19 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </Link>
 
                 <Link href="/leads">
-                    <Card className="hover:shadow-lg transition-shadow duration-200 border-indigo-500/10 bg-gradient-to-br from-background to-indigo-500/5 cursor-pointer h-full">
-                        <CardContent className="p-6">
+                    <Card className="hover:shadow-lg hover:shadow-purple-500/5 transition-all duration-300 border-transparent bg-white cursor-pointer h-full group overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/[0.03] to-transparent" />
+                        <CardContent className="p-5 relative">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">לידים חדשים</p>
-                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.leads.new}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">{stats.leads.qualified} בתהליך</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums text-foreground">{stats.leads.new}</h3>
+                                    <p className="text-xs text-muted-foreground/70 mt-1">
+                                        {stats.leads.qualified} בתהליך
+                                    </p>
                                 </div>
-                                <div className="p-3 bg-indigo-500/10 rounded-xl">
-                                    <Users className="w-5 h-5 text-indigo-500" />
+                                <div className="p-2.5 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <Target className="w-5 h-5 text-purple-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -115,16 +158,19 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </Link>
 
                 <Link href="/clients">
-                    <Card className="hover:shadow-lg transition-shadow duration-200 border-emerald-500/10 bg-gradient-to-br from-background to-emerald-500/5 cursor-pointer h-full">
-                        <CardContent className="p-6">
+                    <Card className="hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 border-transparent bg-white cursor-pointer h-full group overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] to-transparent" />
+                        <CardContent className="p-5 relative">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">לקוחות פעילים</p>
-                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">{stats.clients.active}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">מתוך {stats.clients.total} סה״כ</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums text-foreground">{stats.clients.active}</h3>
+                                    <p className="text-xs text-muted-foreground/70 mt-1">
+                                        מתוך {stats.clients.total} סה״כ
+                                    </p>
                                 </div>
-                                <div className="p-3 bg-emerald-500/10 rounded-xl">
-                                    <Users className="w-5 h-5 text-emerald-500" />
+                                <div className="p-2.5 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <Users className="w-5 h-5 text-emerald-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -132,16 +178,17 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </Link>
 
                 <Link href="/finance">
-                    <Card className="hover:shadow-lg transition-shadow duration-200 border-amber-500/10 bg-gradient-to-br from-background to-amber-500/5 cursor-pointer h-full">
-                        <CardContent className="p-6">
+                    <Card className="hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300 border-transparent bg-white cursor-pointer h-full group overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.03] to-transparent" />
+                        <CardContent className="p-5 relative">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">חשבוניות פתוחות</p>
-                                    <h3 className="text-3xl font-bold mt-2 tabular-nums">₪{stats.finance.pendingInvoices.toLocaleString()}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">ממתין לתשלום</p>
+                                    <h3 className="text-3xl font-bold mt-2 tabular-nums text-foreground">₪{stats.finance.pendingInvoices.toLocaleString()}</h3>
+                                    <p className="text-xs text-muted-foreground/70 mt-1">ממתין לתשלום</p>
                                 </div>
-                                <div className="p-3 bg-amber-500/10 rounded-xl">
-                                    <TrendingUp className="w-5 h-5 text-amber-500" />
+                                <div className="p-2.5 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    <TrendingUp className="w-5 h-5 text-amber-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -157,32 +204,33 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
             />
 
             {/* Recent Activity & Tasks */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Activity */}
-                <Card className="lg:col-span-2 shadow-sm">
+                <Card className="lg:col-span-2 border-transparent bg-white shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-muted-foreground" />
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
                             פעילות אחרונה
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
+                        <div className="space-y-1">
                             {recentActivity.map((activity) => (
-                                <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                                    <div className="mt-1 text-2xl">{activity.icon}</div>
+                                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors">
+                                    <div className="mt-0.5 text-xl">{activity.icon}</div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate">{activity.title}</p>
-                                        <p className="text-sm text-muted-foreground truncate">{activity.description}</p>
+                                        <p className="font-medium text-sm truncate">{activity.title}</p>
+                                        <p className="text-xs text-muted-foreground truncate mt-0.5">{activity.description}</p>
                                     </div>
-                                    <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                        {new Date(activity.timestamp).toLocaleDateString('he-IL')}
+                                    <div className="text-[11px] text-muted-foreground/60 whitespace-nowrap mt-0.5">
+                                        {formatRelativeTime(activity.timestamp)}
                                     </div>
                                 </div>
                             ))}
                             {recentActivity.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    אין פעילות אחרונה
+                                <div className="text-center py-10">
+                                    <Sparkles className="w-8 h-8 text-muted-foreground/20 mx-auto mb-3" />
+                                    <p className="text-muted-foreground text-sm">אין פעילות אחרונה</p>
                                 </div>
                             )}
                         </div>
@@ -190,20 +238,20 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </Card>
 
                 {/* Upcoming Tasks */}
-                <Card className="shadow-sm">
+                <Card className="border-transparent bg-white shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-muted-foreground" />
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
                             משימות קרובות
                         </CardTitle>
-                        <Link href="/tasks" className="text-sm text-primary hover:underline">
-                            לכל המשימות
+                        <Link href="/tasks" className="text-xs text-primary hover:text-primary/80 font-medium transition-colors">
+                            הכל →
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             {upcomingTasks.map((task) => (
-                                <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-border transition-colors">
+                                <div key={task.id} className="flex items-start gap-3 p-3 rounded-xl border border-border/30 hover:border-border/60 bg-white transition-colors">
                                     <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${task.priority === 'urgent' ? 'bg-red-500' :
                                         task.priority === 'high' ? 'bg-orange-500' :
                                             task.priority === 'medium' ? 'bg-yellow-500' :
@@ -211,17 +259,20 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                                         }`} />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-sm truncate">{task.title}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{task.project}</p>
+                                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">{task.project}</p>
                                     </div>
-                                    <div className={`text-xs px-2 py-1 rounded-full ${new Date(task.dueDate) < new Date() ? 'bg-red-100 text-red-700' : 'bg-muted text-muted-foreground'
+                                    <div className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${new Date(task.dueDate) < new Date()
+                                        ? 'bg-red-50 text-red-600'
+                                        : 'bg-muted/50 text-muted-foreground'
                                         }`}>
                                         {new Date(task.dueDate).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })}
                                     </div>
                                 </div>
                             ))}
                             {upcomingTasks.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    אין משימות קרובות
+                                <div className="text-center py-10">
+                                    <CheckSquare className="w-8 h-8 text-muted-foreground/20 mx-auto mb-3" />
+                                    <p className="text-muted-foreground text-sm">אין משימות קרובות</p>
                                 </div>
                             )}
                         </div>
@@ -229,52 +280,6 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
                 </Card>
             </div>
         </div>
-    );
-}
-
-interface StatCardProps {
-    title: string;
-    value: string | number;
-    subtitle: string;
-    icon: React.ReactNode;
-    color: 'blue' | 'purple' | 'green' | 'amber';
-    href: string;
-}
-
-function StatCard({ title, value, subtitle, icon, color, href }: StatCardProps) {
-    const colorClasses = {
-        blue: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
-        purple: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400',
-        green: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400',
-        amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400',
-    };
-
-    return (
-        <Link href={href}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colorClasses[color]}`}>
-                            {icon}
-                        </div>
-                    </div>
-                    <div className="text-3xl font-bold text-foreground tabular-nums">{value}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{title}</div>
-                    <div className="text-xs text-muted-foreground/70 mt-0.5">{subtitle}</div>
-                </CardContent>
-            </Card>
-        </Link>
-    );
-}
-
-function QuickAction({ href, icon, label }: { href: string; icon: string; label: string }) {
-    return (
-        <Link href={href}>
-            <div className="flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/50 hover:border-primary/30 transition-colors cursor-pointer">
-                <span className="text-2xl">{icon}</span>
-                <span className="font-medium text-sm text-foreground">{label}</span>
-            </div>
-        </Link>
     );
 }
 
@@ -287,29 +292,8 @@ function formatRelativeTime(timestamp: string): string {
     const diffDays = Math.floor(diffMs / 86400000);
 
     if (diffMins < 1) return 'עכשיו';
-    if (diffMins < 60) return `לפני ${diffMins} דקות`;
-    if (diffHours < 24) return `לפני ${diffHours} שעות`;
+    if (diffMins < 60) return `לפני ${diffMins} דק׳`;
+    if (diffHours < 24) return `לפני ${diffHours} שע׳`;
     if (diffDays < 7) return `לפני ${diffDays} ימים`;
     return date.toLocaleDateString('he-IL');
-}
-
-function formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((date.getTime() - now.getTime()) / 86400000);
-
-    if (diffDays < 0) return 'באיחור';
-    if (diffDays === 0) return 'היום';
-    if (diffDays === 1) return 'מחר';
-    if (diffDays < 7) return `בעוד ${diffDays} ימים`;
-    return date.toLocaleDateString('he-IL');
-}
-
-function getPriorityColor(priority: string): string {
-    switch (priority) {
-        case 'urgent': return 'bg-red-100 text-red-700';
-        case 'high': return 'bg-orange-100 text-orange-700';
-        case 'medium': return 'bg-yellow-100 text-yellow-700';
-        default: return 'bg-gray-100 text-gray-700';
-    }
 }

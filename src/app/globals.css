@@ -174,12 +174,21 @@ html[lang="en"] {
     @apply bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg;
   }
 
+  .glass-card {
+    @apply bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-white/20 dark:border-neutral-700/30;
+  }
+
   .gradient-primary {
     @apply bg-gradient-to-r from-primary to-accent;
   }
 
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Card with subtle hover lift */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
   }
 
   /* Skip link for accessibility */

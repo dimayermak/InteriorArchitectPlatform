@@ -6,6 +6,10 @@ import { Button, Modal, EmptyState, LeadStatusBadge } from '@/components/ui';
 import type { Lead, LeadStatus } from '@/types/database';
 import { createLead, updateLead, getLeads } from '@/lib/api/leads';
 import { LeadForm } from '@/components/leads/LeadForm';
+import {
+    List, Columns3, Plus, Pencil, CheckCircle2, Building2, Phone,
+    Target, Flame, Star, Moon
+} from 'lucide-react';
 
 type ViewMode = 'table' | 'kanban';
 
@@ -80,28 +84,28 @@ export function LeadsClient({ initialLeads = [], organizationId }: LeadsClientPr
                 </div>
                 <div className="flex items-center gap-3">
                     {/* View Toggle */}
-                    <div className="flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1">
+                    <div className="flex items-center bg-muted/50 rounded-xl p-1">
                         <button
                             onClick={() => setViewMode('table')}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'table'
-                                ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === 'table'
+                                ? 'bg-white text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            📋 טבלה
+                            <List className="w-3.5 h-3.5" /> טבלה
                         </button>
                         <button
                             onClick={() => setViewMode('kanban')}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'kanban'
-                                ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === 'kanban'
+                                ? 'bg-white text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
-                            📊 קנבן
+                            <Columns3 className="w-3.5 h-3.5" /> קנבן
                         </button>
                     </div>
-                    <Button onClick={handleAddLead}>
-                        ➕ ליד חדש
+                    <Button onClick={handleAddLead} className="gap-2">
+                        <Plus className="w-4 h-4" /> ליד חדש
                     </Button>
                 </div>
             </div>
@@ -114,8 +118,8 @@ export function LeadsClient({ initialLeads = [], organizationId }: LeadsClientPr
                         title="אין לידים עדיין"
                         description="התחילו להוסיף לידים חדשים לעקוב אחרי פניות"
                         action={
-                            <Button onClick={handleAddLead}>
-                                ➕ הוספת ליד ראשון
+                            <Button onClick={handleAddLead} className="gap-2">
+                                <Plus className="w-4 h-4" /> הוספת ליד ראשון
                             </Button>
                         }
                     />
@@ -212,18 +216,18 @@ function LeadsTable({
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => onEdit(lead)}
-                                            className="p-2 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                                             title="עריכה מהירה"
                                         >
-                                            ✏️
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </button>
                                         {lead.status !== 'won' && lead.status !== 'lost' && (
                                             <button
                                                 onClick={() => onStatusChange(lead.id, 'won')}
-                                                className="p-2 text-neutral-500 hover:text-success-600 hover:bg-success-50 dark:hover:bg-success-500/10 rounded-lg transition-colors"
+                                                className="p-2 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                                 title="המרה ללקוח"
                                             >
-                                                ✅
+                                                <CheckCircle2 className="w-3.5 h-3.5" />
                                             </button>
                                         )}
                                     </div>
@@ -289,24 +293,24 @@ function LeadsKanban({
                                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => onEdit(lead)}
-                                                className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-primary-600 transition-all"
+                                                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
                                                 title="עריכה מהירה"
                                             >
-                                                ✏️
+                                                <Pencil className="w-3.5 h-3.5" />
                                             </button>
                                             <span className="text-lg">
-                                                {(lead.score || 0) >= 80 ? '🔥' : (lead.score || 0) >= 50 ? '⭐' : '💤'}
+                                                {(lead.score || 0) >= 80 ? <Flame className="w-4 h-4 text-red-500" /> : (lead.score || 0) >= 50 ? <Star className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-400" />}
                                             </span>
                                         </div>
                                     </div>
                                     {lead.company && (
-                                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
-                                            🏢 {lead.company}
+                                        <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5">
+                                            <Building2 className="w-3.5 h-3.5" /> {lead.company}
                                         </p>
                                     )}
                                     {lead.phone && (
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400" dir="ltr">
-                                            📱 {lead.phone}
+                                        <p className="text-sm text-muted-foreground flex items-center gap-1.5" dir="ltr">
+                                            <Phone className="w-3.5 h-3.5" /> {lead.phone}
                                         </p>
                                     )}
                                     {lead.notes && (
