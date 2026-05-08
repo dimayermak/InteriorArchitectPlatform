@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Bell, Plus, ChevronLeft, FolderKanban, Target, CheckSquare, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 // Route name mapping
 const routeNames: Record<string, string> = {
@@ -23,6 +24,19 @@ const routeNames: Record<string, string> = {
     new: 'חדש',
 };
 
+// Detect UUID segments
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Determine entity type from the parent route segment
+function getEntityType(parentSegment: string): string | null {
+    const map: Record<string, string> = {
+        projects: 'projects',
+        leads: 'leads',
+        clients: 'clients',
+    };
+    return map[parentSegment] || null;
+}
+
 const quickCreateItems = [
     { label: 'פרויקט חדש', icon: <FolderKanban className="w-4 h-4" />, href: '/projects/new', color: 'text-emerald-600' },
     { label: 'ליד חדש', icon: <Target className="w-4 h-4" />, href: '/leads/new', color: 'text-purple-600' },
@@ -34,12 +48,62 @@ export function TopNav() {
     const pathname = usePathname();
     const [quickCreateOpen, setQuickCreateOpen] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
+    const [entityNames, setEntityNames] = useState<Record<string, string>>({});
 
     // Build breadcrumbs from path
     const segments = pathname.split('/').filter(Boolean);
+
+    // Fetch entity names for UUID segments
+    useEffect(() => {
+        async function fetchNames() {
+            const uuidSegments = segments.filter(s => UUID_REGEX.test(s));
+            if (uuidSegments.length === 0) return;
+
+            const supabase = createClient();
+            const newNames: Record<string, string> = {};
+
+            for (const uuid of uuidSegments) {
+                // Find parent segment to know which table to query
+                const uuidIndex = segments.indexOf(uuid);
+                const parentSegment = uuidIndex > 0 ? segments[uuidIndex - 1] : null;
+                if (!parentSegment) continue;
+
+                const entityType = getEntityType(parentSegment);
+                if (!entityType) continue;
+
+                try {
+                    const { data } = await supabase
+                        .from(entityType)
+                        .select('name')
+                        .eq('id', uuid)
+                        .single();
+                    if (data?.name) {
+                        newNames[uuid] = data.name;
+                    }
+                } catch {
+                    // Silently fail — will show shortened UUID
+                }
+            }
+
+            if (Object.keys(newNames).length > 0) {
+                setEntityNames(prev => ({ ...prev, ...newNames }));
+            }
+        }
+
+        fetchNames();
+    }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const breadcrumbs = segments.map((segment, index) => {
         const path = '/' + segments.slice(0, index + 1).join('/');
-        const name = routeNames[segment] || segment;
+        let name: string;
+
+        if (UUID_REGEX.test(segment)) {
+            // Use fetched name, or shortened UUID as fallback
+            name = entityNames[segment] || segment.slice(0, 8) + '...';
+        } else {
+            name = routeNames[segment] || segment;
+        }
+
         const isLast = index === segments.length - 1;
         return { name, path, isLast };
     });

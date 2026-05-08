@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 
@@ -8,6 +9,8 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const pathname = usePathname();
+
     return (
         <div className="flex min-h-screen bg-background text-foreground text-right" dir="rtl">
             {/* Sidebar (Fixed Right) */}
@@ -19,7 +22,7 @@ export default function DashboardLayout({
                 <TopNav />
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc]">
+                <main key={pathname} className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc]">
                     {children}
                 </main>
             </div>

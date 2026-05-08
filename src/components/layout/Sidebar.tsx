@@ -85,14 +85,32 @@ export function Sidebar() {
     const [userEmail, setUserEmail] = useState<string>('');
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+    const [studioName, setStudioName] = useState<string>('');
 
     useEffect(() => {
         const supabase = createClient();
-        supabase.auth.getUser().then(({ data }) => {
+        supabase.auth.getUser().then(async ({ data }) => {
             if (data.user) {
                 setUserId(data.user.id);
                 setUserEmail(data.user.email || '');
                 setUserName(data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User');
+
+                // Fetch studio name from organization
+                try {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('organization_id')
+                        .eq('id', data.user.id)
+                        .single();
+                    if (profile?.organization_id) {
+                        const { data: org } = await supabase
+                            .from('organizations')
+                            .select('name')
+                            .eq('id', profile.organization_id)
+                            .single();
+                        if (org?.name) setStudioName(org.name);
+                    }
+                } catch { /* silently fail */ }
             }
         });
     }, []);
@@ -130,12 +148,12 @@ export function Sidebar() {
                     <div className="flex items-center h-16 px-4 border-b border-white/[0.06]">
                         <Link href="/dashboard" className="flex items-center gap-3 group flex-1 min-w-0">
                             <div className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center font-bold text-sm shadow-lg shadow-violet-500/25 transition-transform duration-200 group-hover:scale-105">
-                                IA
+                                H
                             </div>
                             {!collapsed && (
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-sm font-bold truncate">Interior Architect</span>
-                                    <span className="text-[10px] text-white/40 truncate">פלטפורמת ניהול עסק</span>
+                                    <span className="text-sm font-bold truncate">Harmonica</span>
+                                    <span className="text-[10px] text-white/40 truncate">{studioName || 'פלטפורמת ניהול סטודיו'}</span>
                                 </div>
                             )}
                         </Link>

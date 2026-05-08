@@ -1,6 +1,7 @@
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
 import Features from '@/components/landing/Features';
+import AppShowcase from '@/components/landing/AppShowcase';
 import Workflow from '@/components/landing/Workflow';
 import ProblemAgitation from '@/components/landing/ProblemAgitation';
 import Testimonials from '@/components/landing/Testimonials';
@@ -24,6 +25,8 @@ export default function Home() {
                 <ProblemAgitation />
 
                 <Features />
+
+                <AppShowcase />
 
                 <div className="bg-muted/30 py-12">
                     <Workflow />

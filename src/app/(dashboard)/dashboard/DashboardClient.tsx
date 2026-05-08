@@ -10,6 +10,7 @@ import {
     CheckSquare, Wallet, ArrowUpLeft, Sparkles, Sun, Sunset, Moon, FolderKanban
 } from 'lucide-react';
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts';
+import { OnboardingBanner } from '@/components/layout/OnboardingBanner';
 
 interface DashboardClientProps {
     organizationId: string;
@@ -90,6 +91,9 @@ export function DashboardClient({ organizationId }: DashboardClientProps) {
 
     return (
         <div className="p-6 space-y-8 max-w-[1600px] mx-auto animate-fade-in">
+            {/* Onboarding Banner */}
+            <OnboardingBanner />
+
             {/* Greeting Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">

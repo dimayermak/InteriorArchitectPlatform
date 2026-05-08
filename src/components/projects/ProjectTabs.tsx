@@ -8,9 +8,8 @@ import { ProjectSuppliers } from './ProjectSuppliers';
 import { ProjectOrders } from './ProjectOrders';
 import { ProjectSupervision } from './ProjectSupervision';
 import { ProjectFinance } from './ProjectFinance';
-import { ProjectGallery } from './ProjectGallery';
-import { ProjectClientReport } from './ProjectClientReport';
 import { ProjectFiles } from './ProjectFiles';
+import { ProjectClientReport } from './ProjectClientReport';
 
 interface ProjectTabsProps {
     project: Project & { client: { name: string } | null };
@@ -59,15 +58,12 @@ export function ProjectTabs({ project, stats, tasks, statusLabels, organizationI
                 <ProjectFinance projectId={project.id} budget={project.budget || 0} />
             </TabsContent>
 
-            <TabsContent value="gallery" className="space-y-8">
-                <ProjectGallery projectId={project.id} />
-                <div className="border-t border-border pt-6">
-                    <ProjectFiles
-                        projectId={project.id}
-                        organizationId={organizationId}
-                        userId={userId}
-                    />
-                </div>
+            <TabsContent value="gallery">
+                <ProjectFiles
+                    projectId={project.id}
+                    organizationId={organizationId}
+                    userId={userId}
+                />
             </TabsContent>
 
             <TabsContent value="client-report">
