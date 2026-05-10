@@ -4,17 +4,17 @@ import { motion } from 'framer-motion';
 import { XCircle, CheckCircle, Clock, FolderX, DollarSign, Users, LayoutDashboard, Share2, CreditCard, Bot } from 'lucide-react';
 
 const painPoints = [
-    { icon: FolderX, text: 'לידים שהלכו לאיבוד בלי מעקב', color: 'text-red-500' },
-    { icon: Clock, text: 'שעות עבודה לא מתועדות', color: 'text-orange-500' },
-    { icon: DollarSign, text: 'חשבוניות ורכש בגיליון אקסל', color: 'text-yellow-500' },
-    { icon: Users, text: 'הלקוח שואל "מה קורה?" כל שבוע', color: 'text-pink-500' },
+    { icon: FolderX, text: 'לידים הולכים לאיבוד בוואטסאפ בלי מעקב', color: 'text-red-500' },
+    { icon: Clock, text: 'שעות עבודה — מי סופר? אף אחד', color: 'text-orange-500' },
+    { icon: DollarSign, text: 'תקציב פרויקט באקסל שעודכן בפעם האחרונה לפני חודש', color: 'text-yellow-500' },
+    { icon: Users, text: '"מתי כבר תשלח לי סקיצה?" — הלקוח בפעם השלישית השבוע', color: 'text-pink-500' },
 ];
 
 const solutionPoints = [
-    { icon: LayoutDashboard, text: 'דשבורד עם כל המידע בזמן אמת', color: 'text-blue-500' },
-    { icon: CreditCard, text: 'כספים, חשבוניות ורכש בפלטפורמה', color: 'text-green-500' },
-    { icon: Share2, text: 'פורטל לקוח — שקיפות ללא מאמץ', color: 'text-purple-500' },
-    { icon: Bot, text: 'סוכן AI שעוזר לנהל חכם יותר', color: 'text-cyan-500' },
+    { icon: LayoutDashboard, text: 'דשבורד אחד — הכל בזמן אמת', color: 'text-blue-500' },
+    { icon: CreditCard, text: 'חשבוניות ורכש מסודרים — רווח אמיתי לכל פרויקט', color: 'text-green-500' },
+    { icon: Share2, text: 'פורטל לקוח — הוא רואה לבד, לא צריך לשאול', color: 'text-purple-500' },
+    { icon: Bot, text: 'סוכן AI שמתריע לפני שהדברים נופלים', color: 'text-cyan-500' },
 ];
 
 export default function ProblemAgitation() {
@@ -37,9 +37,9 @@ export default function ProblemAgitation() {
                         transition={{ delay: 0.1 }}
                         className="text-lg text-muted-foreground"
                     >
-                        רוב המעצבים מבלים 40% מהזמן שלהם בניהול אדמיניסטרטיבי במקום בעיצוב.
+                        רוב המעצבים מבלים 40% מהזמן שלהם ב"ניהול" — וואטסאפים עם לקוחות, חיפוש קבצים, עדכון אקסלים.
                         <br className="hidden md:block" />
-                        הגיע הזמן לעבור מכיבוי שריפות לניהול מבוקר.
+                        Harmonica מחזיר לכם את הזמן הזה.
                     </motion.p>
                 </div>
 

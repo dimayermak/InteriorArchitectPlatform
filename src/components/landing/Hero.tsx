@@ -8,7 +8,7 @@ import { ArrowLeft, LayoutDashboard, Clock, Share2, Bot } from 'lucide-react';
 const stats = [
     { value: '10', label: 'מודולים מובנים' },
     { value: '100%', label: 'בעברית RTL' },
-    { value: '∞', label: 'פרויקטים ולקוחות' },
+    { value: '$29', label: 'לחודש — לא למשתמש' },
 ];
 
 export default function Hero() {
@@ -46,9 +46,9 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                     className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tight leading-[1.1] mb-8 max-w-5xl mx-auto"
                 >
-                    נהלו סטודיו
+                    את/ה מעצב/ת
                     <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-blue-600 pb-2">
-                        בסטנדרט עולמי
+                        אנחנו מנהלים את השאר
                     </span>
                 </motion.h1>
 
@@ -59,9 +59,9 @@ export default function Hero() {
                     transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                     className="text-lg md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed"
                 >
-                    מניהול לידים ולקוחות, דרך פרויקטים ומשימות עם גאנט,
+                    CRM, פרויקטים, כספים, לוח שנה ופורטל לקוח — בעברית, במחיר של קפה ביום.
                     <br className="hidden md:block" />
-                    ועד למעקב כספי מלא — הכל בפלטפורמה אחת בעברית.
+                    בלי אקסלים, בלי וואטסאפ כאוטי, בלי "רגע איפה שמתי את הקובץ?".
                 </motion.p>
 
                 {/* CTA Buttons */}

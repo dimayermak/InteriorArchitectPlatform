@@ -23,14 +23,17 @@ export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
 export interface Organization {
     id: string;
     name: string;
-    slug: string;
     logo_url: string | null;
-    settings: Record<string, unknown>;
-    subscription_tier: SubscriptionTier;
-    subscription_status: string;
+    studio_type: string | null;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    address: string | null;
+    city: string | null;
+    bio: string | null;
+    license_number: string | null;
     created_at: string;
     updated_at: string;
-    deleted_at: string | null;
 }
 
 export interface User {

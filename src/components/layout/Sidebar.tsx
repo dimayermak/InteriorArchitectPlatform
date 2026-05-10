@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import AgentActivityFeed from '@/components/ai/AgentActivityFeed';
 import AgentSettingsPanel from '@/components/ai/AgentSettingsPanel';
-import { createClient } from '@/lib/supabase/client';
+import { useOrg } from '@/lib/auth/OrgProvider';
 
 // Navigation Groups
 interface NavItem {
@@ -73,47 +73,14 @@ const navGroups: NavGroup[] = [
     },
 ];
 
-const TEMP_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 export function Sidebar() {
     const pathname = usePathname();
+    const { orgId, userId, userName, userEmail, studioName } = useOrg();
     const [collapsed, setCollapsed] = useState(false);
     const [agentPanelOpen, setAgentPanelOpen] = useState(false);
     const [agentSettingsOpen, setAgentSettingsOpen] = useState(false);
-    const [userId, setUserId] = useState<string>('');
-    const [userName, setUserName] = useState<string>('');
-    const [userEmail, setUserEmail] = useState<string>('');
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [quickCreateOpen, setQuickCreateOpen] = useState(false);
-    const [studioName, setStudioName] = useState<string>('');
-
-    useEffect(() => {
-        const supabase = createClient();
-        supabase.auth.getUser().then(async ({ data }) => {
-            if (data.user) {
-                setUserId(data.user.id);
-                setUserEmail(data.user.email || '');
-                setUserName(data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User');
-
-                // Fetch studio name from organization
-                try {
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('organization_id')
-                        .eq('id', data.user.id)
-                        .single();
-                    if (profile?.organization_id) {
-                        const { data: org } = await supabase
-                            .from('organizations')
-                            .select('name')
-                            .eq('id', profile.organization_id)
-                            .single();
-                        if (org?.name) setStudioName(org.name);
-                    }
-                } catch { /* silently fail */ }
-            }
-        });
-    }, []);
 
     const toggleGroup = (groupId: string) => {
         setCollapsedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
@@ -363,13 +330,13 @@ export function Sidebar() {
 
             {/* AI Agent Panels */}
             <AgentActivityFeed
-                organizationId={TEMP_ORG_ID}
-                userId={userId}
+                organizationId={orgId || ''}
+                userId={userId || ''}
                 isOpen={agentPanelOpen}
                 onClose={() => setAgentPanelOpen(false)}
             />
             <AgentSettingsPanel
-                organizationId={TEMP_ORG_ID}
+                organizationId={orgId || ''}
                 isOpen={agentSettingsOpen}
                 onClose={() => setAgentSettingsOpen(false)}
             />

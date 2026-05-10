@@ -12,6 +12,7 @@ import { getCurrentOrganizationId } from '@/lib/auth/user';
 
 interface ProjectPlanProps {
     projectId: string;
+    organizationId: string;
     initialTasks: Task[];
 }
 
@@ -22,11 +23,7 @@ const taskStatusIcons: Record<string, React.ReactNode> = {
     done: <CheckCircle2 className="w-4 h-4 text-green-500" />,
 };
 
-// We use a constant for the org id for now to match the page logic, 
-// strictly we should fetch it or pass it. 
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
-export function ProjectPlan({ projectId, initialTasks }: ProjectPlanProps) {
+export function ProjectPlan({ projectId, organizationId, initialTasks }: ProjectPlanProps) {
     const [tasks, setTasks] = useState<Task[]>(initialTasks);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -38,7 +35,7 @@ export function ProjectPlan({ projectId, initialTasks }: ProjectPlanProps) {
 
         try {
             const task = await createTask({
-                organization_id: DEV_ORG_ID, // Use context or prop in real app
+                organization_id: organizationId,
                 project_id: projectId,
                 title: newTaskTitle,
             });

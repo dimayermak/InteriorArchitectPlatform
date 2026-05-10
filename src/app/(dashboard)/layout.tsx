@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
+import { OrgProvider } from '@/lib/auth/OrgProvider';
 
 export default function DashboardLayout({
     children,
@@ -12,20 +13,22 @@ export default function DashboardLayout({
     const pathname = usePathname();
 
     return (
-        <div className="flex min-h-screen bg-background text-foreground text-right" dir="rtl">
-            {/* Sidebar (Fixed Right) */}
-            <Sidebar />
+        <OrgProvider>
+            <div className="flex min-h-screen bg-background text-foreground text-right" dir="rtl">
+                {/* Sidebar (Fixed Right) */}
+                <Sidebar />
 
-            {/* Main Content Area */}
-            <div className="flex flex-1 flex-col mr-[300px] transition-all duration-300 w-[calc(100vw-300px)]">
-                {/* Top Navigation */}
-                <TopNav />
+                {/* Main Content Area */}
+                <div className="flex flex-1 flex-col mr-[300px] transition-all duration-300 w-[calc(100vw-300px)]">
+                    {/* Top Navigation */}
+                    <TopNav />
 
-                {/* Page Content */}
-                <main key={pathname} className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc]">
-                    {children}
-                </main>
+                    {/* Page Content */}
+                    <main key={pathname} className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc]">
+                        {children}
+                    </main>
+                </div>
             </div>
-        </div>
+        </OrgProvider>
     );
 }

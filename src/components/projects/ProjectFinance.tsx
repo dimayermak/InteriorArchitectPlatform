@@ -10,15 +10,13 @@ import { getInvoices, getExpenses, createExpense, deleteExpense } from '@/lib/ap
 import { getPurchaseOrders } from '@/lib/api/orders';
 import type { Invoice, Expense, PurchaseOrder } from '@/types/database';
 
-// Temporary constant until we have proper context
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 interface ProjectFinanceProps {
     projectId: string;
+    organizationId: string;
     budget: number;
 }
 
-export function ProjectFinance({ projectId, budget }: ProjectFinanceProps) {
+export function ProjectFinance({ projectId, organizationId, budget }: ProjectFinanceProps) {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
@@ -38,8 +36,8 @@ export function ProjectFinance({ projectId, budget }: ProjectFinanceProps) {
     async function loadData() {
         try {
             const [invoicesData, expensesData, ordersData] = await Promise.all([
-                getInvoices(DEV_ORG_ID, { projectId, type: 'client_invoice' }),
-                getExpenses(DEV_ORG_ID, { projectId }),
+                getInvoices(organizationId, { projectId, type: 'client_invoice' }),
+                getExpenses(organizationId, { projectId }),
                 getPurchaseOrders(projectId)
             ]);
             setInvoices(invoicesData);
@@ -57,7 +55,7 @@ export function ProjectFinance({ projectId, budget }: ProjectFinanceProps) {
 
         try {
             await createExpense({
-                organization_id: DEV_ORG_ID,
+                organization_id: organizationId,
                 project_id: projectId,
                 description: expenseDescription,
                 amount: Number(expenseAmount),

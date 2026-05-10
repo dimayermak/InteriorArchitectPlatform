@@ -5,11 +5,9 @@ import { Plus, Trash2, Save, Loader2, CheckCircle2, Share2, Copy, Check, Externa
 import { getClientReport, upsertClientReport } from '@/lib/api/client-reports';
 import type { UnexpectedEvent, DeliveryEstimate } from '@/lib/api/client-reports';
 
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 interface ProjectClientReportProps {
     projectId: string;
-    organizationId?: string;
+    organizationId: string;
 }
 
 function newEvent(): UnexpectedEvent {
@@ -178,7 +176,7 @@ const DeliveryRow = memo(function DeliveryRow({ delivery, onChange, onRemove }: 
 
 // ─── Main editor ──────────────────────────────────────────────────────────────
 
-export function ProjectClientReport({ projectId, organizationId = DEV_ORG_ID }: ProjectClientReportProps) {
+export function ProjectClientReport({ projectId, organizationId }: ProjectClientReportProps) {
     const [events, setEvents] = useState<UnexpectedEvent[]>([]);
     const [deliveries, setDeliveries] = useState<DeliveryEstimate[]>([]);
     const [notes, setNotes] = useState('');

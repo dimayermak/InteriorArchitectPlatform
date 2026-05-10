@@ -39,11 +39,11 @@ export function ProjectTabs({ project, stats, tasks, statusLabels, organizationI
             </TabsContent>
 
             <TabsContent value="plan">
-                <ProjectPlan projectId={project.id} initialTasks={tasks} />
+                <ProjectPlan projectId={project.id} organizationId={organizationId} initialTasks={tasks} />
             </TabsContent>
 
             <TabsContent value="suppliers">
-                <ProjectSuppliers projectId={project.id} />
+                <ProjectSuppliers projectId={project.id} organizationId={organizationId} />
             </TabsContent>
 
             <TabsContent value="orders">
@@ -55,7 +55,7 @@ export function ProjectTabs({ project, stats, tasks, statusLabels, organizationI
             </TabsContent>
 
             <TabsContent value="finance">
-                <ProjectFinance projectId={project.id} budget={project.budget || 0} />
+                <ProjectFinance projectId={project.id} organizationId={organizationId} budget={project.budget || 0} />
             </TabsContent>
 
             <TabsContent value="gallery">
@@ -67,7 +67,7 @@ export function ProjectTabs({ project, stats, tasks, statusLabels, organizationI
             </TabsContent>
 
             <TabsContent value="client-report">
-                <ProjectClientReport projectId={project.id} />
+                <ProjectClientReport projectId={project.id} organizationId={organizationId} />
             </TabsContent>
         </Tabs>
     );

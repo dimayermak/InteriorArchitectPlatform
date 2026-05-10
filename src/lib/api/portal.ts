@@ -9,8 +9,6 @@ import { randomBytes } from 'crypto';
 // Portal API - Public Project Access
 // ============================================
 
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 export interface PortalFinancials {
     budget: number;
     // Spent by designer (purchase orders + expenses) — out of budget

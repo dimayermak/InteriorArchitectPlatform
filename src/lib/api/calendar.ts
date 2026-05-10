@@ -7,8 +7,6 @@ import type { Meeting, MeetingType, MeetingStatus } from '@/types/database';
 // Calendar API
 // ============================================
 
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 export type MeetingInsert = Omit<Meeting, 'id' | 'created_at' | 'updated_at'>;
 export type MeetingUpdate = Partial<Omit<Meeting, 'id' | 'created_at' | 'updated_at'>>;
 
@@ -25,7 +23,7 @@ export interface CalendarFilters {
  * Get meetings with optional filtering
  */
 export async function getMeetings(
-    orgId: string = DEV_ORG_ID,
+    orgId: string,
     filters: CalendarFilters = {}
 ): Promise<Meeting[]> {
     const supabase = await createClient();
@@ -66,7 +64,7 @@ export async function getMeetings(
 export async function getMeetingsForMonth(
     year: number,
     month: number,
-    orgId: string = DEV_ORG_ID
+    orgId: string
 ): Promise<Meeting[]> {
     const startDate = new Date(year, month, 1).toISOString();
     const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
@@ -101,7 +99,7 @@ export async function createMeeting(meeting: MeetingInsert): Promise<Meeting> {
         .from('meetings')
         .insert({
             ...meeting,
-            organization_id: meeting.organization_id || DEV_ORG_ID,
+            organization_id: meeting.organization_id,
         })
         .select()
         .single();
@@ -167,7 +165,7 @@ export async function getMeetingsByProject(projectId: string): Promise<Meeting[]
 /**
  * Get today's meetings
  */
-export async function getTodaysMeetings(orgId: string = DEV_ORG_ID): Promise<Meeting[]> {
+export async function getTodaysMeetings(orgId: string): Promise<Meeting[]> {
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
     const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
@@ -178,7 +176,7 @@ export async function getTodaysMeetings(orgId: string = DEV_ORG_ID): Promise<Mee
 /**
  * Get upcoming meetings (next 7 days)
  */
-export async function getUpcomingMeetings(orgId: string = DEV_ORG_ID, days: number = 7): Promise<Meeting[]> {
+export async function getUpcomingMeetings(orgId: string, days: number = 7): Promise<Meeting[]> {
     const today = new Date();
     const futureDate = new Date(today);
     futureDate.setDate(futureDate.getDate() + days);

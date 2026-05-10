@@ -9,9 +9,8 @@ import { getTasks } from '@/lib/api/tasks';
 import type { Project, ProjectPhase, Task } from '@/types/database';
 import { ArrowRight, User } from 'lucide-react';
 import { ProjectTabs } from '@/components/projects/ProjectTabs';
-import { createClient } from '@/lib/supabase/client';
-
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
+import { useOrg } from '@/lib/auth/OrgProvider';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
     planning: { label: 'תכנון', color: 'bg-blue-100 text-blue-700' },
@@ -25,23 +24,20 @@ export default function ProjectDetailPage() {
     const params = useParams();
     const router = useRouter();
     const projectId = params.id as string;
+    const { orgId, userId } = useOrg();
 
     const [project, setProject] = useState<(Project & { client: { name: string } | null; phases: ProjectPhase[] }) | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [stats, setStats] = useState<{ tasksTotal: number; tasksCompleted: number; hoursLogged: number; budget: number; spent: number } | null>(null);
     const [loading, setLoading] = useState(true);
-    const [userId, setUserId] = useState('');
 
     useEffect(() => {
         async function load() {
+            if (!orgId) return;
             try {
-                const supabase = createClient();
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) setUserId(user.id);
-
                 const [projectData, tasksData, statsData] = await Promise.all([
                     getProjectWithDetails(projectId),
-                    getTasks(DEV_ORG_ID, projectId),
+                    getTasks(orgId, projectId),
                     getProjectStats(projectId),
                 ]);
                 setProject(projectData);
@@ -54,7 +50,7 @@ export default function ProjectDetailPage() {
             }
         }
         load();
-    }, [projectId]);
+    }, [projectId, orgId]);
 
     const handleStatusChange = async (newStatus: Project['status']) => {
         if (!project) return;
@@ -86,7 +82,8 @@ export default function ProjectDetailPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <ErrorBoundary>
+            <div className="p-6 space-y-6">
             {/* Header */}
             <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -124,9 +121,10 @@ export default function ProjectDetailPage() {
                 stats={stats}
                 tasks={tasks}
                 statusLabels={statusLabels}
-                organizationId={DEV_ORG_ID}
-                userId={userId}
+                organizationId={orgId || ''}
+                userId={userId || ''}
             />
-        </div>
+            </div>
+        </ErrorBoundary>
     );
 }

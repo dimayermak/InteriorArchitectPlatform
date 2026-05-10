@@ -12,9 +12,6 @@ import { getPurchaseOrders, createPurchaseOrder, deletePurchaseOrder, updatePurc
 import { getProjectSuppliers } from '@/lib/api/suppliers';
 import type { PurchaseOrder, Supplier, InvoiceItem } from '@/types/database';
 
-// Temporary constant until we have proper context
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 interface ProjectOrdersProps {
     projectId: string;
 }

@@ -7,15 +7,13 @@ import type { ProjectTemplate } from '@/types/database';
 // Templates API
 // ============================================
 
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
-
 export type TemplateInsert = Omit<ProjectTemplate, 'id' | 'created_at' | 'updated_at'>;
 export type TemplateUpdate = Partial<Omit<ProjectTemplate, 'id' | 'created_at' | 'updated_at'>>;
 
 /**
  * Get all templates for an organization (including system templates)
  */
-export async function getTemplates(orgId: string = DEV_ORG_ID): Promise<ProjectTemplate[]> {
+export async function getTemplates(orgId: string): Promise<ProjectTemplate[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from('project_templates')
@@ -56,7 +54,7 @@ export async function createTemplate(template: TemplateInsert): Promise<ProjectT
         .from('project_templates')
         .insert({
             ...template,
-            organization_id: template.organization_id || DEV_ORG_ID,
+            organization_id: template.organization_id,
             is_system: false,
             is_active: true,
         })
@@ -105,7 +103,8 @@ export async function deleteTemplate(id: string): Promise<void> {
  */
 export async function applyTemplate(
     templateId: string,
-    projectId: string
+    projectId: string,
+    orgId: string
 ): Promise<{ phasesCreated: number; tasksCreated: number }> {
     const supabase = await createClient();
 
@@ -146,7 +145,7 @@ export async function applyTemplate(
                     const { error: taskError } = await supabase
                         .from('tasks')
                         .insert({
-                            organization_id: DEV_ORG_ID,
+                            organization_id: orgId,
                             project_id: projectId,
                             phase_id: phaseData.id,
                             title: task.title,
@@ -171,7 +170,7 @@ export async function applyTemplate(
 export async function duplicateTemplate(
     id: string,
     newName: string,
-    orgId: string = DEV_ORG_ID
+    orgId: string
 ): Promise<ProjectTemplate> {
     const template = await getTemplate(id);
     if (!template) throw new Error('Template not found');

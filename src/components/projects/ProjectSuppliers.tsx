@@ -8,18 +8,16 @@ import { Input } from '@/components/ui/Input';
 import { Plus, Trash2, Phone, Mail, Building2, User } from 'lucide-react';
 import { getSuppliers, getProjectSuppliers, addSupplierToProject, removeSupplierFromProject } from '@/lib/api/suppliers';
 import type { Supplier } from '@/types/database';
-import { getCurrentOrganizationId } from '@/lib/auth/user';
-
-// Temporary constant until we have proper context
-const DEV_ORG_ID = '0df6e562-dc80-48b7-9018-2b4c8aad0d43';
+import { useOrg } from '@/lib/auth/OrgProvider';
 
 interface ProjectSuppliersProps {
     projectId: string;
+    organizationId: string;
 }
 
 type ProjectSupplier = Supplier & { role: string | null; notes: string | null };
 
-export function ProjectSuppliers({ projectId }: ProjectSuppliersProps) {
+export function ProjectSuppliers({ projectId, organizationId }: ProjectSuppliersProps) {
     const [projectSuppliers, setProjectSuppliers] = useState<ProjectSupplier[]>([]);
     const [allSuppliers, setAllSuppliers] = useState<Supplier[]>([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +36,7 @@ export function ProjectSuppliers({ projectId }: ProjectSuppliersProps) {
         try {
             const [pSuppliers, aSuppliers] = await Promise.all([
                 getProjectSuppliers(projectId),
-                getSuppliers(DEV_ORG_ID)
+                getSuppliers(organizationId)
             ]);
             setProjectSuppliers(pSuppliers);
             setAllSuppliers(aSuppliers);
