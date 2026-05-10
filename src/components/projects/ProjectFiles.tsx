@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
     Upload, FileText, ImageIcon, Trash2, Download,
-    Loader2, FolderOpen, Pencil, Check, X, ZoomIn,
+    Loader2, FolderOpen, Pencil, Check, X,
     FileSpreadsheet, FileArchive, File,
 } from 'lucide-react';
 import {
@@ -59,7 +59,7 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
     const [uploadProgress, setUploadProgress] = useState('');
     const [dragOver, setDragOver] = useState(false);
     const [error, setError] = useState('');
-    const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -269,43 +269,35 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {images.map(file => {
                             const url = signedUrls[file.id];
+                            const isExpanded = expandedImage === file.id;
                             return (
-                                <div key={file.id} className="group relative rounded-xl overflow-hidden border border-border bg-muted aspect-square">
+                                <div
+                                    key={file.id}
+                                    className="relative rounded-xl overflow-hidden border border-border bg-muted aspect-square cursor-pointer"
+                                    onClick={() => setExpandedImage(isExpanded ? null : file.id)}
+                                >
                                     {url ? (
                                         // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={url} alt={file.name} className="w-full h-full object-cover" />
+                                        <img src={url} alt={file.name} className={`w-full h-full object-cover transition-all ${isExpanded ? 'scale-105 brightness-50' : ''}`} />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                                         </div>
                                     )}
 
-                                    {/* Overlay */}
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex flex-col justify-between p-2 opacity-0 group-hover:opacity-100">
-                                        {/* Top actions */}
-                                        <div className="flex justify-end gap-1">
-                                            <button onClick={() => startRename(file)} className="w-7 h-7 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors" title="שנה שם">
+                                    {/* Actions — always show when selected, or on hover for desktop */}
+                                    <div className={`absolute inset-0 flex flex-col justify-between p-2 transition-opacity ${isExpanded ? 'bg-black/50 opacity-100' : 'bg-black/0 opacity-0 hover:bg-black/50 hover:opacity-100'}`}>
+                                        <div className="flex justify-end gap-1" onClick={e => e.stopPropagation()}>
+                                            <button onClick={() => startRename(file)} className="w-7 h-7 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-black/60" title="שנה שם">
                                                 <Pencil className="w-3.5 h-3.5" />
                                             </button>
-                                            <button onClick={() => handleDownload(file)} className="w-7 h-7 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors" title="הורד">
+                                            <button onClick={() => handleDownload(file)} className="w-7 h-7 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-black/60" title="הורד">
                                                 <Download className="w-3.5 h-3.5" />
                                             </button>
-                                            <button onClick={() => handleDelete(file)} className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${deletingId === file.id ? 'bg-yellow-500 text-white animate-pulse' : 'bg-red-500/60 text-white hover:bg-red-500'}`} title={deletingId === file.id ? 'לחץ שוב לאישור' : 'מחק'}>
+                                            <button onClick={() => handleDelete(file)} className={`w-7 h-7 rounded-md flex items-center justify-center ${deletingId === file.id ? 'bg-yellow-500 text-white animate-pulse' : 'bg-red-500/60 text-white hover:bg-red-500'}`} title={deletingId === file.id ? 'לחץ שוב לאישור' : 'מחק'}>
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                        {/* Zoom button */}
-                                        {url && (
-                                            <button
-                                                onClick={() => setLightboxUrl(url)}
-                                                className="absolute inset-0 flex items-center justify-center"
-                                            >
-                                                <span className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                                                    <ZoomIn className="w-5 h-5 text-white" />
-                                                </span>
-                                            </button>
-                                        )}
-                                        {/* Filename */}
                                         <div className="text-xs text-white/90 truncate font-medium">{file.name}</div>
                                     </div>
 
@@ -395,20 +387,20 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
             )}
 
             {/* Lightbox */}
-            {lightboxUrl && (
+            {expandedImage && (
                 <div
                     className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4"
-                    onClick={() => setLightboxUrl(null)}
+                    onClick={() => setExpandedImage(null)}
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={lightboxUrl}
+                        src={signedUrls[expandedImage] || ''}
                         alt="תצוגה מוגדלת"
                         className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
                         onClick={e => e.stopPropagation()}
                     />
                     <button
-                        onClick={() => setLightboxUrl(null)}
+                        onClick={() => setExpandedImage(null)}
                         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 transition-colors"
                     >
                         <X className="w-5 h-5" />
