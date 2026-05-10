@@ -29,6 +29,18 @@ export function ProjectGallery({ projectId }: ProjectGalleryProps) {
     const [localImages, setLocalImages] = useState(images);
     const [localFiles, setLocalFiles] = useState(files);
 
+    function handleDeleteImage(imageId: string) {
+        if (!confirm('למחוק את התמונה?')) return;
+        setLocalImages(prev => prev.filter(img => img.id !== imageId));
+        setImages(prev => prev.filter(img => img.id !== imageId));
+    }
+
+    function handleDeleteFile(fileId: string) {
+        if (!confirm('למחוק את הקובץ?')) return;
+        setLocalFiles(prev => prev.filter(f => f.id !== fileId));
+        setFiles(prev => prev.filter(f => f.id !== fileId));
+    }
+
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -105,7 +117,7 @@ export function ProjectGallery({ projectId }: ProjectGalleryProps) {
                                 <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-gray-900">
                                     <ExternalLink className="w-4 h-4" />
                                 </Button>
-                                <Button variant="destructive" size="icon" className="h-8 w-8 rounded-full">
+                                <Button variant="destructive" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleDeleteImage(image.id)}>
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -145,7 +157,7 @@ export function ProjectGallery({ projectId }: ProjectGalleryProps) {
                                         <Button variant="ghost" size="icon" className="h-8 w-8">
                                             <Download className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteFile(file.id)}>
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
