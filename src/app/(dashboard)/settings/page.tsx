@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { createClient } from '@/lib/supabase/client';
-import { Building2, Phone, Mail, Globe, MapPin, FileText, Camera, Save, Loader2 } from 'lucide-react';
+import { Building2, Phone, Mail, Globe, MapPin, FileText, Camera, Save, Loader2, Link2 } from 'lucide-react';
+import { LeadFormSettings } from '@/components/settings/LeadFormSettings';
 
 const STUDIO_TYPES = [
     { value: 'interior_design', label: 'עיצוב פנים' },
@@ -303,6 +304,9 @@ export default function SettingsPage() {
                     </Button>
                 </div>
             </form>
+
+            {/* Lead Form Settings */}
+            {orgId && <LeadFormSettings organizationId={orgId} />}
         </div>
     );
 }

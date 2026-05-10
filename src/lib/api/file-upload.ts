@@ -86,8 +86,9 @@ export async function getSignedUrl(filePath: string): Promise<string> {
 
 export async function deleteProjectFile(file: ProjectFile): Promise<void> {
     const supabase = createClient();
-    // Remove from storage
-    await supabase.storage.from('project-files').remove([file.file_path]);
+    // Remove from storage (best-effort — don't fail if storage delete errors)
+    const { error: storageError } = await supabase.storage.from('project-files').remove([file.file_path]);
+    if (storageError) console.warn('Storage delete warning:', storageError.message);
     // Remove DB record
     const { error } = await supabase.from('project_files').delete().eq('id', file.id);
     if (error) throw new Error(error.message);

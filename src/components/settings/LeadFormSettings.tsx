@@ -1,23 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Check, RefreshCw, ExternalLink, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 interface LeadFormSettingsProps {
-    orgId: string;
-    currentToken: string | null;
-    orgName: string;
+    organizationId: string;
 }
 
-export function LeadFormSettings({ orgId, currentToken, orgName }: LeadFormSettingsProps) {
-    const [token, setToken] = useState(currentToken);
+export function LeadFormSettings({ organizationId }: LeadFormSettingsProps) {
+    const [token, setToken] = useState<string | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
     const [generating, setGenerating] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Load existing token on mount
+    useEffect(() => {
+        async function loadToken() {
+            try {
+                const res = await fetch(`/api/leads/submit?org_id=${organizationId}`, { method: 'GET' });
+                if (res.ok) {
+                    const data = await res.json();
+                    setToken(data.api_token || null);
+                }
+            } catch { /* no token yet */ }
+            setLoading(false);
+        }
+        loadToken();
+    }, [organizationId]);
 
     const formUrl = token
-        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/lead-form?org=${orgId}&token=${token}`
+        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/lead-form?org=${organizationId}&token=${token}`
         : '';
 
     const iframeCode = token
@@ -30,7 +44,7 @@ export function LeadFormSettings({ orgId, currentToken, orgName }: LeadFormSetti
             const res = await fetch('/api/leads/submit', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ org_id: orgId }),
+                body: JSON.stringify({ org_id: organizationId }),
             });
             const data = await res.json();
             if (data.api_token) {

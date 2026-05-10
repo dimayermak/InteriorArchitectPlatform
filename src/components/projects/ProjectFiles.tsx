@@ -62,6 +62,7 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const load = useCallback(async () => {
@@ -141,13 +142,21 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
     }
 
     async function handleDelete(file: ProjectFile) {
-        if (!confirm(`למחוק את "${file.name}"?`)) return;
-        try {
-            await deleteProjectFile(file);
-            setFiles(prev => prev.filter(f => f.id !== file.id));
-            setSignedUrls(prev => { const n = { ...prev }; delete n[file.id]; return n; });
-        } catch (e) {
-            setError(e instanceof Error ? e.message : 'שגיאה במחיקה');
+        if (deletingId === file.id) {
+            // Second click — actually delete
+            setDeletingId(null);
+            try {
+                await deleteProjectFile(file);
+                setFiles(prev => prev.filter(f => f.id !== file.id));
+                setSignedUrls(prev => { const n = { ...prev }; delete n[file.id]; return n; });
+            } catch (e) {
+                console.error('Delete failed:', e);
+                setError(e instanceof Error ? `שגיאה במחיקה: ${e.message}` : 'שגיאה במחיקה');
+            }
+        } else {
+            // First click — show confirmation state
+            setDeletingId(file.id);
+            setTimeout(() => setDeletingId(null), 3000); // Auto-cancel after 3s
         }
     }
 
@@ -281,7 +290,7 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
                                             <button onClick={() => handleDownload(file)} className="w-7 h-7 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors" title="הורד">
                                                 <Download className="w-3.5 h-3.5" />
                                             </button>
-                                            <button onClick={() => handleDelete(file)} className="w-7 h-7 rounded-md bg-red-500/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors" title="מחק">
+                                            <button onClick={() => handleDelete(file)} className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${deletingId === file.id ? 'bg-yellow-500 text-white animate-pulse' : 'bg-red-500/60 text-white hover:bg-red-500'}`} title={deletingId === file.id ? 'לחץ שוב לאישור' : 'מחק'}>
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
@@ -374,7 +383,7 @@ export function ProjectFiles({ projectId, organizationId, userId }: ProjectFiles
                                         <button onClick={() => handleDownload(file)} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="הורד">
                                             <Download className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => handleDelete(file)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors" title="מחק">
+                                        <button onClick={() => handleDelete(file)} className={`p-2 rounded-lg transition-colors ${deletingId === file.id ? 'bg-yellow-500/20 text-yellow-600 hover:text-yellow-700 animate-pulse' : 'hover:bg-red-500/10 text-muted-foreground hover:text-red-500'}`} title={deletingId === file.id ? 'לחץ שוב לאישור' : 'מחק'}>
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>

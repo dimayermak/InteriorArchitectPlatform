@@ -203,8 +203,16 @@ function LeadsTable({
                                 <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400" dir="ltr">
                                     {lead.phone || '-'}
                                 </td>
-                                <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">
-                                    {lead.source || '-'}
+                                <td className="px-6 py-4">
+                                    {lead.source ? (
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                            lead.source === 'web_form' 
+                                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' 
+                                                : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300'
+                                        }`}>
+                                            {lead.source === 'web_form' ? '🌐 טופס לידים' : lead.source}
+                                        </span>
+                                    ) : '-'}
                                 </td>
                                 <td className="px-6 py-4">
                                     <LeadStatusBadge status={lead.status} />
