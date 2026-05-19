@@ -40,6 +40,7 @@ export default function Header() {
                 <NavLink href="#audience">למי זה מתאים?</NavLink>
                 <NavLink href="#support">בונוסים</NavLink>
                 <NavLink href="/pricing">מחירים</NavLink>
+                <NavLink href="#contact">צרו קשר</NavLink>
             </div>
 
             <div className="flex items-center gap-4">

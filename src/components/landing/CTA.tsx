@@ -44,6 +44,11 @@ export default function CTA() {
                                 <ArrowLeft className="mr-2 h-6 w-6" />
                             </Button>
                         </Link>
+                        <a href="#contact">
+                            <Button variant="outline" size="lg" className="rounded-full px-12 h-16 text-xl font-bold hover:scale-105 transition-transform">
+                                השאירו פרטים
+                            </Button>
+                        </a>
                     </div>
 
 

@@ -77,6 +77,11 @@ export default function Hero() {
                             <ArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
                         </Button>
                     </Link>
+                    <a href="#contact">
+                        <Button variant="outline" size="lg" className="rounded-full px-8 h-14 text-lg font-medium hover:scale-105 transition-all duration-300">
+                            השאירו פרטים
+                        </Button>
+                    </a>
                     <Link href="#features">
                         <Button variant="ghost" size="lg" className="rounded-full px-8 h-14 text-lg font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
                             גלו את הפיצ&#39;רים

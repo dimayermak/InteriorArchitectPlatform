@@ -7,6 +7,7 @@ import ProblemAgitation from '@/components/landing/ProblemAgitation';
 import Testimonials from '@/components/landing/Testimonials';
 import Support from '@/components/landing/Support';
 import CTA from '@/components/landing/CTA';
+import ContactForm from '@/components/landing/ContactForm';
 import Footer from '@/components/landing/Footer';
 
 export default function Home() {
@@ -35,6 +36,8 @@ export default function Home() {
                 <Support />
 
                 <Testimonials />
+
+                <ContactForm />
 
                 <CTA />
             </main>

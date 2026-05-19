@@ -23,7 +23,7 @@ export default function Footer() {
                 <div className="flex gap-8 text-sm font-medium text-muted-foreground">
                     <Link href="#" className="hover:text-primary transition-colors">תנאי שימוש</Link>
                     <Link href="#" className="hover:text-primary transition-colors">פרטיות</Link>
-                    <Link href="#" className="hover:text-primary transition-colors">צור קשר</Link>
+                    <Link href="#contact" className="hover:text-primary transition-colors">צור קשר</Link>
                 </div>
 
                 <div className="flex gap-4">
